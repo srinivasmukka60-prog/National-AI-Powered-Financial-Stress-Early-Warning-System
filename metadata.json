@@ -1,0 +1,6 @@
+{
+  "name": "SME-SENTINEL – National SME Financial Stress Predictor",
+  "description": "AI-powered national early-warning intelligence platform that predicts financial stress among Indian SMEs/MSMEs at state, district, sector, and cluster levels 30-90 days in advance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
