@@ -1,8 +1,8 @@
 import { NATIONAL_OVERVIEW, STATES_DATA, SECTORS_DATA, EARLY_WARNING_ALERTS } from '../data/indiaData';
-import { SMEFinancialInputs, SMEAnalysisResult, CrisisScenarioParams, SimulationResult } from '../types';
+import { SMEFinancialInputs, SMEAnalysisResult, CrisisScenarioParams, SimulationResult, AIRiskScoreResult, CFOAdvisoryResult } from '../types';
 import { analyzeSMEFinancials } from './mlEngine';
 import { runCrisisSimulation } from './simulationEngine';
-import { generateAIPolicyBriefing, AIInsightReport } from './geminiService';
+import { generateAIPolicyBriefing, AIInsightReport, generateAIRiskScore, generateCFOAdvisory } from './geminiService';
 
 /**
  * Robust API Client with built-in instant local fallback for 100% offline & zero-latency reliability.
@@ -94,5 +94,40 @@ export const ApiClient = {
       // Fallback
     }
     return await generateAIPolicyBriefing(context);
+  },
+
+  async generateAIRiskScore(
+    inputs: SMEFinancialInputs,
+    mlBaselineScore?: number
+  ): Promise<AIRiskScoreResult> {
+    try {
+      const res = await fetch('/api/ai-risk-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs, mlBaselineScore }),
+      });
+      if (res.ok) return await res.json();
+    } catch {
+      // Fallback
+    }
+    return await generateAIRiskScore(inputs, mlBaselineScore);
+  },
+
+  async generateCFOAdvisory(
+    userQuery: string,
+    inputs: SMEFinancialInputs,
+    conversationHistory?: { role: string; content: string }[]
+  ): Promise<CFOAdvisoryResult> {
+    try {
+      const res = await fetch('/api/digital-cfo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userQuery, inputs, conversationHistory }),
+      });
+      if (res.ok) return await res.json();
+    } catch {
+      // Fallback
+    }
+    return await generateCFOAdvisory(userQuery, inputs, conversationHistory);
   },
 };

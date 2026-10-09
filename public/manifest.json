@@ -1,0 +1,18 @@
+{
+  "short_name": "SME-SENTINEL",
+  "name": "SME-SENTINEL: National SME Financial Stress Early-Warning Platform",
+  "description": "AI-powered national early-warning intelligence platform that predicts financial stress among Indian SMEs/MSMEs at state, district, and cluster levels.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0d12",
+  "theme_color": "#0284c7",
+  "display": "standalone",
+  "orientation": "any"
+}

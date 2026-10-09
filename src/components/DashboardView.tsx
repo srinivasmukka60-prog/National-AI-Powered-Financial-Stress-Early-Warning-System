@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NATIONAL_OVERVIEW, STATES_DATA, SECTORS_DATA, EARLY_WARNING_ALERTS } from '../data/indiaData';
-import { UserRole, StateData } from '../types';
+import { UserRole, StateData, SMEFinancialInputs } from '../types';
 import { getRiskColor } from '../services/mlEngine';
+import { AIRiskScoreModal } from './AIRiskScoreModal';
 import {
   TrendingUp,
   AlertTriangle,
@@ -11,6 +12,9 @@ import {
   Activity,
   Layers,
   Sparkles,
+  Grid,
+  Bot,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -40,6 +44,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const rankedStates = [...STATES_DATA].sort((a, b) => b.stressScore - a.stressScore);
   // Ranked sectors by stress
   const rankedSectors = [...SECTORS_DATA].sort((a, b) => b.stressScore - a.stressScore);
+
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const demoSmeInputs: SMEFinancialInputs = {
+    businessName: 'Surat Synthetic Textiles LLP (National Cluster Sample)',
+    sector: 'Textiles & Garments',
+    state: 'Gujarat',
+    district: 'Surat',
+    annualRevenueLakhs: 480,
+    revenueGrowthYoY: -14.5,
+    netProfitMargin: 2.1,
+    debtToEquity: 2.8,
+    dscr: 1.05,
+    receivablesDays: 88,
+    payablesDays: 42,
+    inventoryTurnoverDays: 75,
+    cashRunwayMonths: 1.4,
+    rawMaterialInflationPct: 18.0,
+    monthlyInterestBurdenLakhs: 3.8,
+  };
 
   return (
     <div className="space-y-6">
@@ -156,6 +179,84 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-800/80 text-xs text-slate-400">
             <span>Model Confidence:</span>
             <span className="font-mono font-bold text-emerald-400">{NATIONAL_OVERVIEW.confidence}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Risk Score Feature Hero Banner */}
+      <div className={`p-4 md:p-5 rounded-2xl border transition-all ${
+        darkMode
+          ? 'bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-slate-900/60 border-indigo-500/30 shadow-lg shadow-indigo-950/20'
+          : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-white border-indigo-200 shadow-sm'
+      }`}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/25 shrink-0">
+              <Sparkles className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                  AI Risk Score & Credit Grade Engine
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping" />
+                  Gemini 2.5 Flash
+                </span>
+              </div>
+              <h3 className={`text-base font-bold mt-0.5 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                Enterprise Financial Risk Evaluation & Insolvency Early-Warning
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Evaluates 5 sub-pillars (Liquidity, Debt Solvency, Operations, Supply Chain, Macro), calculates covenant rate shock tolerance, and simulates prescriptive mitigations.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setAiModalOpen(true)}
+              className="px-3.5 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Evaluate AI Risk Score</span>
+            </button>
+            <button
+              onClick={() => onNavigate('heatmap')}
+              className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-colors cursor-pointer flex items-center gap-1.5 ${
+                darkMode ? 'border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20' : 'border-rose-300 bg-rose-50 text-rose-800 hover:bg-rose-100'
+              }`}
+            >
+              <Grid className="w-3.5 h-3.5 text-rose-400" />
+              <span>Risk Heatmap</span>
+            </button>
+            <button
+              onClick={() => onNavigate('cfo')}
+              className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-colors cursor-pointer flex items-center gap-1.5 ${
+                darkMode ? 'border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20' : 'border-purple-300 bg-purple-50 text-purple-800 hover:bg-purple-100'
+              }`}
+            >
+              <Bot className="w-3.5 h-3.5 text-purple-400" />
+              <span>AI Digital CFO</span>
+            </button>
+            <button
+              onClick={() => onNavigate('intervention')}
+              className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-colors cursor-pointer flex items-center gap-1.5 ${
+                darkMode ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20' : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Intervention Simulator</span>
+            </button>
+            <button
+              onClick={() => onNavigate('analyzer')}
+              className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-colors cursor-pointer flex items-center gap-1 ${
+                darkMode ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700' : 'border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200'
+              }`}
+            >
+              <span>Custom MSME</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </div>
@@ -448,6 +549,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
+
+      {/* AI Risk Score Diagnostic Modal */}
+      <AIRiskScoreModal
+        isOpen={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        inputs={demoSmeInputs}
+        mlBaselineScore={NATIONAL_OVERVIEW.stressScore}
+        darkMode={darkMode}
+      />
     </div>
   );
 };

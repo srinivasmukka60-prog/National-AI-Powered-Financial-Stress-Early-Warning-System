@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserRole } from '../types';
-import { Moon, Sun, Presentation, ChevronDown, Menu, X, Landmark, Building2, User } from 'lucide-react';
+import { Moon, Sun, ChevronDown, Menu, X, Landmark, Building2, User } from 'lucide-react';
 
 interface HeaderProps {
   currentTab: string;
@@ -9,7 +9,7 @@ interface HeaderProps {
   setUserRole: (role: UserRole) => void;
   darkMode: boolean;
   setDarkMode: (dark: boolean) => void;
-  onOpenTour: () => void;
+  onOpenTour?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,14 +26,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard' },
-    { id: 'map', label: 'Live National Map' },
+    { id: 'map', label: 'Live Map' },
+    { id: 'heatmap', label: 'Risk Heatmap' },
+    { id: 'analyzer', label: 'AI Risk Analyzer' },
     { id: 'sectors', label: 'Sectors' },
     { id: 'forecast', label: 'Forecast' },
-    { id: 'analyzer', label: 'SME Analyzer' },
     { id: 'simulator', label: 'Crisis Simulator' },
+    { id: 'intervention', label: 'Intervention Simulator' },
     { id: 'alerts', label: 'Early Warnings' },
     { id: 'insights', label: 'AI Insights' },
-    { id: 'methodology', label: 'Methodology' },
   ];
 
   const roleMeta = {
@@ -52,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Zone 1: Brand Wordmark */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setCurrentTab('landing')}
+            onClick={() => setCurrentTab('dashboard')}
             className="flex items-center gap-2.5 text-left group cursor-pointer focus:outline-none"
           >
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-sm">
@@ -148,17 +149,6 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
-
-          {/* Hackathon Tour CTA */}
-          <button
-            onClick={onOpenTour}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
-            title="Launch 7-step guided presentation tour"
-          >
-            <Presentation className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Presentation Mode</span>
-            <span className="sm:hidden">Tour</span>
-          </button>
 
           {/* Theme Toggle */}
           <button

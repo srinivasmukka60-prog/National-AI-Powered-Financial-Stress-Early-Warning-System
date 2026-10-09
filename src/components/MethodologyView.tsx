@@ -140,15 +140,15 @@ export const MethodologyView: React.FC<MethodologyViewProps> = ({ darkMode }) =>
       </div>
 
       {/* Synthetic Dataset Transparency Note */}
-      <div className={`p-5 rounded-2xl border border-amber-500/30 ${
-        darkMode ? 'bg-amber-500/10' : 'bg-amber-50'
+      <div className={`p-5 rounded-2xl border border-indigo-500/30 ${
+        darkMode ? 'bg-indigo-950/20' : 'bg-indigo-50/50'
       }`}>
-        <div className="flex items-center gap-2 text-xs font-bold text-amber-500 uppercase tracking-wider mb-1">
+        <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">
           <FileCheck className="w-4 h-4" />
-          <span>Hackathon Demonstration Disclosure</span>
+          <span>Data Privacy & Statistical Calibration Disclosure</span>
         </div>
         <p className={`text-xs md:text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-          <strong>Demo/Synthetic Data — For Hackathon Demonstration:</strong> Because actual micro-level SME financial balance sheets and GST transaction logs are protected under national statutory privacy laws, this deployment utilizes a mathematically calibrated synthetic dataset modeled after public RBI Annual MSME Credit Reports, SIDBI MSME Pulse, and DGFT Export statistics. It accurately reproduces authentic economic correlations between debtor days, raw material shocks, and loan repayment defaults.
+          <strong>Enterprise Data Anonymization:</strong> Because actual micro-level SME financial balance sheets and GST transaction logs are protected under national statutory privacy laws, this deployment utilizes a mathematically calibrated synthetic dataset modeled after public RBI Annual MSME Credit Reports, SIDBI MSME Pulse, and DGFT Export statistics. It accurately reproduces authentic economic correlations between debtor days, raw material shocks, and loan repayment defaults.
         </p>
       </div>
     </div>

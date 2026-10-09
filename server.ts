@@ -6,7 +6,7 @@ import { createServer as createViteServer } from 'vite';
 import { NATIONAL_OVERVIEW, STATES_DATA, SECTORS_DATA, EARLY_WARNING_ALERTS } from './src/data/indiaData.ts';
 import { analyzeSMEFinancials } from './src/services/mlEngine.ts';
 import { runCrisisSimulation } from './src/services/simulationEngine.ts';
-import { generateAIPolicyBriefing } from './src/services/geminiService.ts';
+import { generateAIPolicyBriefing, generateAIRiskScore, generateCFOAdvisory } from './src/services/geminiService.ts';
 
 dotenv.config();
 
@@ -72,6 +72,26 @@ async function startServer() {
       res.json(report);
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Error generating policy insight' });
+    }
+  });
+
+  app.post('/api/ai-risk-score', async (req, res) => {
+    try {
+      const { inputs, mlBaselineScore } = req.body;
+      const result = await generateAIRiskScore(inputs, mlBaselineScore);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Error evaluating AI risk score' });
+    }
+  });
+
+  app.post('/api/digital-cfo', async (req, res) => {
+    try {
+      const { userQuery, inputs, conversationHistory } = req.body;
+      const result = await generateCFOAdvisory(userQuery, inputs, conversationHistory);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Error generating CFO advisory' });
     }
   });
 

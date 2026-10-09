@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SME-SENTINEL — National SME Financial Stress Predictor</title>
+  <meta name="description" content="AI-powered national early-warning intelligence platform that predicts financial stress among Indian SMEs/MSMEs 30-90 days in advance." />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Chart.js CDN for interactive charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- Top System Notice Banner -->
+  <div class="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-xs flex items-center justify-between text-amber-300">
+    <div class="flex items-center gap-2 max-w-5xl mx-auto w-full">
+      <i data-lucide="shield-alert" class="w-4 h-4 shrink-0 text-amber-400"></i>
+      <span>
+        <strong>National Intelligence Grid (SME-SENTINEL):</strong> Synthetic Early-Warning Telemetry &middot; RBI / SIDBI / MSME Regulatory Alignment &middot; Zero PII Protected
+      </span>
+      <span class="ml-auto hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono border border-emerald-500/30">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SYSTEM HEALTHY
+      </span>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="sticky top-0 z-40 border-b bg-slate-950/90 border-slate-800 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-4">
+      <!-- Wordmark -->
+      <button onclick="switchTab('dashboard')" class="flex items-center gap-2.5 text-left group focus:outline-none">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-sm">
+          <span class="font-extrabold text-white text-base">SS</span>
+        </div>
+        <div>
+          <span class="text-lg font-extrabold tracking-tight text-white block">SME-SENTINEL</span>
+          <span class="text-[10px] text-slate-400 -mt-1 block font-mono">FINANCIAL STRESS PREDICTOR</span>
+        </div>
+      </button>
+
+      <!-- Nav Links -->
+      <nav class="hidden lg:flex items-center gap-1">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-slate-800 text-amber-400">Dashboard</button>
+        <button onclick="switchTab('map')" id="nav-map" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">National Map</button>
+        <button onclick="switchTab('sectors')" id="nav-sectors" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">Sectors</button>
+        <button onclick="switchTab('forecast')" id="nav-forecast" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">Forecast</button>
+        <button onclick="switchTab('analyzer')" id="nav-analyzer" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">SME Analyzer</button>
+        <button onclick="switchTab('simulator')" id="nav-simulator" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">Crisis Simulator</button>
+        <button onclick="switchTab('alerts')" id="nav-alerts" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">Early Warnings</button>
+        <button onclick="switchTab('insights')" id="nav-insights" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">AI Insights</button>
+        <button onclick="switchTab('methodology')" id="nav-methodology" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-900">Methodology</button>
+      </nav>
+
+      <!-- Role Selector & Actions -->
+      <div class="flex items-center gap-2.5">
+        <!-- Role selector -->
+        <select id="role-select" onchange="changeRole(this.value)" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-medium cursor-pointer">
+          <option value="government">🏛️ Government / Policy</option>
+          <option value="financial_institution">🏢 Financial Institution</option>
+          <option value="sme_owner">👤 SME Owner</option>
+        </select>
+
+        <!-- Hackathon Tour CTA -->
+        <button onclick="openTour()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-sm cursor-pointer">
+          <i data-lucide="presentation" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Demo Tour</span>
+        </button>
+
+        <!-- Dark/Light Toggle -->
+        <button onclick="toggleTheme()" class="p-2 rounded-lg border border-slate-700 bg-slate-900 text-slate-300 hover:text-white cursor-pointer" title="Toggle theme">
+          <i data-lucide="sun" id="theme-icon" class="w-4 h-4 text-amber-400"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Viewport -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6">
+
+    <!-- TAB 1: DASHBOARD -->
+    <section id="tab-dashboard" class="tab-content space-y-6">
+      <!-- 4 Top KPI Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: National Stress Index -->
+        <div class="p-5 rounded-2xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">National SME Stress Index</span>
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">MODERATE</span>
+          </div>
+          <div class="flex items-baseline gap-2 mt-3">
+            <span class="text-5xl font-extrabold font-mono text-amber-400 tabular-nums">58.4</span>
+            <span class="text-slate-400 text-sm font-semibold">/ 100</span>
+          </div>
+          <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800 text-xs text-slate-400">
+            <i data-lucide="trending-up" class="w-4 h-4 text-orange-400"></i>
+            <span><strong class="text-orange-400 font-semibold">+8.4 pts</strong> increase over prior 90-day baseline</span>
+          </div>
+        </div>
+
+        <!-- Card 2: High-Risk Regions -->
+        <div class="p-5 rounded-2xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">High-Risk Regions</span>
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-orange-400"></i>
+          </div>
+          <div class="flex items-baseline gap-2 mt-3">
+            <span class="text-5xl font-extrabold font-mono text-orange-400 tabular-nums">8</span>
+            <span class="text-slate-400 text-sm">of 15 Monitored States</span>
+          </div>
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-800 text-xs">
+            <span class="text-slate-400">Critical Clusters:</span>
+            <span class="font-semibold text-amber-400">Surat, Tiruppur, Ludhiana</span>
+          </div>
+        </div>
+
+        <!-- Card 3: High-Risk Sectors -->
+        <div class="p-5 rounded-2xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">High-Risk Sectors</span>
+            <i data-lucide="layers" class="w-4 h-4 text-red-400"></i>
+          </div>
+          <div class="flex items-baseline gap-2 mt-3">
+            <span class="text-5xl font-extrabold font-mono text-red-400 tabular-nums">4</span>
+            <span class="text-slate-400 text-sm">of 10 Monitored</span>
+          </div>
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-800 text-xs">
+            <span class="text-slate-400">Lead Squeeze:</span>
+            <span class="font-semibold text-red-400">Textiles (78.2), Auto (68.5)</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Trajectory Forecast -->
+        <div class="p-5 rounded-2xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">90-Day Trajectory Forecast</span>
+            <i data-lucide="activity" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+            <div class="p-1.5 rounded-lg bg-slate-800/60">
+              <div class="text-[10px] text-slate-400 font-medium uppercase">30d</div>
+              <div class="text-base font-bold font-mono text-amber-400">62.1</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-slate-800/60">
+              <div class="text-[10px] text-slate-400 font-medium uppercase">60d</div>
+              <div class="text-base font-bold font-mono text-orange-400">67.5</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-slate-800/60">
+              <div class="text-[10px] text-slate-400 font-medium uppercase">90d</div>
+              <div class="text-base font-bold font-mono text-red-400">71.8</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-800 text-xs text-slate-400">
+            <span>Model Confidence:</span>
+            <span class="font-mono font-bold text-emerald-400">88.5%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role-Specific Insight Banner -->
+      <div id="role-banner" class="p-4 rounded-xl border bg-amber-500/10 border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-lg bg-amber-500 text-slate-950 font-bold">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div id="role-banner-title" class="text-xs font-bold text-amber-400 uppercase tracking-wider">
+              Government & Policy Directives
+            </div>
+            <p id="role-banner-desc" class="text-xs md:text-sm mt-0.5 text-slate-300">
+              8 export clusters are tracking toward debt servicing breaches within 60 days. Immediate TReDS digital invoice discounting and state power duty relief recommended.
+            </p>
+          </div>
+        </div>
+        <button onclick="switchTab('simulator')" class="shrink-0 px-3.5 py-2 text-xs font-bold rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors flex items-center gap-1.5 cursor-pointer">
+          <span id="role-banner-btn-text">Simulate Economic Shock</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Main Stress Trend Chart -->
+        <div class="lg:col-span-7 p-5 md:p-6 rounded-2xl border bg-slate-900/60 border-slate-800">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="text-base font-bold text-white">National SME Financial Stress Trend & 90-Day Trajectory</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Composite stress score historical progression and forward predictive cone.</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs">
+              <span class="flex items-center gap-1.5 text-amber-400"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Actual</span>
+              <span class="flex items-center gap-1.5 text-red-400"><span class="w-2.5 h-2.5 rounded-full bg-red-400"></span> Forecast Cone</span>
+            </div>
+          </div>
+          <div class="h-64 w-full">
+            <canvas id="trendChart"></canvas>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+            <span>High Stress Threshold: <strong class="text-amber-400">60.0</strong></span>
+            <span>Critical Stress Threshold: <strong class="text-red-400">80.0</strong></span>
+            <span>Expected Critical Date: <strong class="text-orange-400">Dec 2026 (+60d)</strong></span>
+          </div>
+        </div>
+
+        <!-- SHAP Risk Factor Attribution -->
+        <div class="lg:col-span-5 p-5 md:p-6 rounded-2xl border bg-slate-900/60 border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-base font-bold text-white">Top Macro Risk Factors</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Aggregated SHAP feature importance driving national index.</p>
+            </div>
+            <span class="text-xs font-mono text-amber-500 font-bold">SHAP %</span>
+          </div>
+
+          <div class="space-y-3.5">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-200">Receivables Cycle Lengthening (DSO &gt; 75d)</span>
+                <span class="font-mono text-amber-400 font-bold">28.4%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full" style="width: 85%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-200">Raw Material Input Inflation (Metals/Energy)</span>
+                <span class="font-mono text-amber-400 font-bold">24.1%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full" style="width: 72%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-200">Working Capital Borrowing Rates (9.8% avg)</span>
+                <span class="font-mono text-amber-400 font-bold">19.6%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full" style="width: 58%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-200">Export Demand Contraction (EU/US)</span>
+                <span class="font-mono text-amber-400 font-bold">16.2%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full" style="width: 48%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-200">Debt Service Coverage Friction (DSCR &lt; 1.15)</span>
+                <span class="font-mono text-amber-400 font-bold">11.7%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full" style="width: 35%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-400 space-y-1">
+            <div class="font-semibold text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>AI Attribution Diagnosis:</span>
+            </div>
+            <p>
+              Supply-chain payment delays (DSO &gt; 75d) account for nearly 30% of total financial stress. Without invoice discounting, working capital gaps will trigger secondary loan defaults.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regional & Sector Ranking Tables -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Regional Ranking -->
+        <div class="lg:col-span-6 p-5 md:p-6 rounded-2xl border bg-slate-900/60 border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-white">Regional Risk Ranking (Top States)</h3>
+            <button onclick="switchTab('map')" class="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer">
+              Explore Map <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <div class="space-y-2.5" id="state-ranking-list"></div>
+        </div>
+
+        <!-- Sector Ranking -->
+        <div class="lg:col-span-6 p-5 md:p-6 rounded-2xl border bg-slate-900/60 border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-white">Sector Risk Ranking (10 Verticals)</h3>
+            <button onclick="switchTab('sectors')" class="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer">
+              All Sectors <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <div class="space-y-2.5" id="sector-ranking-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: NATIONAL MAP -->
+    <section id="tab-map" class="tab-content hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white">Interactive National SME Risk Heatmap</h2>
+          <p class="text-xs text-slate-400 mt-1">Multi-state geographical intelligence mapped by MSME credit exposure, cluster concentration, and default risk.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="state-search-input" onkeyup="filterStateCards(this.value)" placeholder="Search state, cluster, or sector..." class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-3 py-2 w-64 focus:outline-none focus:border-amber-500 text-white placeholder-slate-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="all-states-grid"></div>
+    </section>
+
+    <!-- TAB 3: SECTORS -->
+    <section id="tab-sectors" class="tab-content hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white">Sector Vulnerability Engine (10 Verticals)</h2>
+          <p class="text-xs text-slate-400 mt-1">Deep analysis across manufacturing, services, agro, and trade with supply chain sensitivity.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="all-sectors-grid"></div>
+    </section>
+
+    <!-- TAB 4: FORECAST -->
+    <section id="tab-forecast" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl border bg-slate-900/60 border-slate-800 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-white">90-Day Predictive Trajectory Engine</h2>
+          <p class="text-xs text-slate-400 mt-1">Stochastic forward cone incorporating macro elasticity, RBI repo rate path, and global export order books.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+            <div class="text-xs text-slate-400">30-Day Window (Nov 2026)</div>
+            <div class="text-3xl font-bold font-mono text-amber-400 mt-1">62.1 <span class="text-xs text-slate-400 font-sans">/ 100</span></div>
+            <div class="text-xs text-slate-400 mt-2">Expected range: 58.5 &ndash; 65.8 pts &middot; Moderate Stress</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+            <div class="text-xs text-slate-400">60-Day Window (Dec 2026)</div>
+            <div class="text-3xl font-bold font-mono text-orange-400 mt-1">67.5 <span class="text-xs text-slate-400 font-sans">/ 100</span></div>
+            <div class="text-xs text-slate-400 mt-2">Expected range: 62.8 &ndash; 72.3 pts &middot; Elevated Stress</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+            <div class="text-xs text-slate-400">90-Day Window (Jan 2027)</div>
+            <div class="text-3xl font-bold font-mono text-red-400 mt-1">71.8 <span class="text-xs text-slate-400 font-sans">/ 100</span></div>
+            <div class="text-xs text-slate-400 mt-2">Expected range: 66.2 &ndash; 77.4 pts &middot; Critical Stress</div>
+          </div>
+        </div>
+
+        <div class="h-80 w-full">
+          <canvas id="forecastEngineChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: SME ANALYZER SANDBOX -->
+    <section id="tab-analyzer" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl border bg-slate-900/60 border-slate-800">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-white">Confidential SME Health Assessment Sandbox</h2>
+            <p class="text-xs text-slate-400 mt-1">Test your business financials in an isolated, confidential environment. Zero data leaves your browser.</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
+            🔒 100% Client-Side Sandbox
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <!-- Input Form -->
+          <div class="lg:col-span-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Financial Indicators</h3>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Annual Turnover (₹ Lakhs)</label>
+                <input id="input-turnover" type="number" value="450" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">YoY Revenue Growth (%)</label>
+                <input id="input-growth" type="number" value="-12" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Receivables (DSO Days)</label>
+                <input id="input-dso" type="number" value="84" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Net Profit Margin (%)</label>
+                <input id="input-margin" type="number" step="0.5" value="3.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">DSCR (Debt Service Ratio)</label>
+                <input id="input-dscr" type="number" step="0.05" value="1.08" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Cash Runway (Months)</label>
+                <input id="input-runway" type="number" step="0.1" value="1.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              </div>
+            </div>
+
+            <button onclick="calculateSMEHealth()" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+              <i data-lucide="calculator" class="w-4 h-4"></i>
+              <span>Evaluate Risk & Generate Restructuring Steps</span>
+            </button>
+          </div>
+
+          <!-- Output Score & Breakdown -->
+          <div class="lg:col-span-6 p-5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Assessment Results</h3>
+            
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <div>
+                <div class="text-xs text-slate-400">Calculated Stress Score</div>
+                <div class="text-4xl font-extrabold font-mono text-orange-400 mt-1" id="res-score">72.4 <span class="text-xs font-sans text-slate-400">/ 100</span></div>
+                <div class="text-xs font-bold text-orange-400 uppercase mt-0.5" id="res-badge">HIGH STRESS RISK</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-400">60-Day Default Probability</div>
+                <div class="text-2xl font-bold font-mono text-red-400" id="res-prob">78.5%</div>
+                <div class="text-[11px] text-slate-400">Confidence: 91%</div>
+              </div>
+            </div>
+
+            <!-- Tailored Recommendations -->
+            <div class="space-y-2">
+              <div class="text-xs font-semibold text-slate-300">Actionable Restructuring Interventions:</div>
+              <div id="res-actions" class="space-y-2 text-xs">
+                <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 flex gap-2.5">
+                  <span class="text-amber-400 font-bold">1.</span>
+                  <div>
+                    <div class="font-bold text-slate-200">Mandate TReDS Invoice Factoring</div>
+                    <p class="text-slate-400 text-[11px] mt-0.5">Discount delayed invoices (DSO &gt; 80d) at 8.5% bank rates to free up ₹38L cash flow immediately.</p>
+                  </div>
+                </div>
+                <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 flex gap-2.5">
+                  <span class="text-amber-400 font-bold">2.</span>
+                  <div>
+                    <div class="font-bold text-slate-200">Restructure Loan Amortization (DSCR &lt; 1.15)</div>
+                    <p class="text-slate-400 text-[11px] mt-0.5">Request a 6-month principal moratorium under MSME restructuring framework.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: CRISIS SIMULATOR -->
+    <section id="tab-simulator" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl border bg-slate-900/60 border-slate-800 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Macroeconomic Shock & Stress Simulator</h2>
+            <p class="text-xs text-slate-400 mt-1">Simulate interest rate shocks, raw material spikes, export contraction, and payment friction in real-time.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400">Presets:</span>
+            <button onclick="applyPreset('export_collapse')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 font-medium cursor-pointer">Export Collapse</button>
+            <button onclick="applyPreset('rate_spike')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 font-medium cursor-pointer">Rate Hike (+250bps)</button>
+            <button onclick="applyPreset('reset')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium cursor-pointer">Reset</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <!-- Sliders -->
+          <div class="lg:col-span-6 space-y-5">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium">Interest Rate Shock (bps)</span>
+                <span class="font-mono text-amber-400 font-bold" id="val-rate">+100 bps</span>
+              </div>
+              <input id="slider-rate" type="range" min="-200" max="400" step="25" value="100" oninput="updateSimulation()" class="w-full accent-amber-500">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium">Raw Material Inflation (%)</span>
+                <span class="font-mono text-amber-400 font-bold" id="val-mat">+10%</span>
+              </div>
+              <input id="slider-mat" type="range" min="-15" max="35" step="1" value="10" oninput="updateSimulation()" class="w-full accent-amber-500">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium">Customer Demand / Revenue Contraction (%)</span>
+                <span class="font-mono text-amber-400 font-bold" id="val-demand">-10%</span>
+              </div>
+              <input id="slider-demand" type="range" min="-30" max="15" step="1" value="-10" oninput="updateSimulation()" class="w-full accent-amber-500">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium">Payment Delay Days Delta</span>
+                <span class="font-mono text-amber-400 font-bold" id="val-delay">+15 days</span>
+              </div>
+              <input id="slider-delay" type="range" min="-15" max="45" step="5" value="15" oninput="updateSimulation()" class="w-full accent-amber-500">
+            </div>
+          </div>
+
+          <!-- Simulation Output Summary -->
+          <div class="lg:col-span-6 p-5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase">Simulated National Impact</span>
+              <span id="sim-badge" class="px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30">ELEVATED</span>
+            </div>
+
+            <div class="flex items-baseline gap-3">
+              <span class="text-5xl font-extrabold font-mono text-orange-400" id="sim-score">66.8</span>
+              <span class="text-sm font-bold font-mono text-red-400" id="sim-delta">(+8.4 delta)</span>
+            </div>
+
+            <div class="p-3.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300 leading-relaxed" id="sim-summary">
+              ELEVATED STRESS THRESHOLD: Stress expands to 66.8. Auto ancillary and textile units experience immediate working-capital depletion as debtor cycles expand, requiring targeted TReDS discounting support.
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-900/60 border border-slate-800 text-xs">
+              <span class="text-slate-400">Required National Liquidity Backstop:</span>
+              <span class="font-mono font-bold text-amber-400" id="sim-buffer">₹72,400 Cr</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 7: EARLY WARNINGS -->
+    <section id="tab-alerts" class="tab-content hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-white">Active Early Warning Intelligence Bulletins</h2>
+          <p class="text-xs text-slate-400 mt-1">Algorithmic risk triggers alerting policymakers and bank risk committees before NPA transitions.</p>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-bold border border-red-500/30">
+          5 ACTIVE ALERTS
+        </span>
+      </div>
+      <div class="space-y-4" id="alerts-container"></div>
+    </section>
+
+    <!-- TAB 8: AI INSIGHTS -->
+    <section id="tab-insights" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl border bg-slate-900/60 border-slate-800 space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">AI Policy & Credit Risk Briefing Generator</h2>
+            <p class="text-xs text-slate-400 mt-1">Synthesizes macro data, cluster liquidity metrics, and statutory interventions into structured policy intelligence.</p>
+          </div>
+          <button onclick="regenerateInsight()" class="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Regenerate Executive Briefing</span>
+          </button>
+        </div>
+
+        <div class="p-5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-base font-bold text-amber-400" id="insight-title">SME-SENTINEL Intelligence Memo: National MSME Landscape</h3>
+            <span class="text-xs text-slate-400 font-mono" id="insight-time">Today, 05:30 PM IST</span>
+          </div>
+          <p class="text-xs md:text-sm text-slate-300 leading-relaxed" id="insight-exec">
+            The national industrial cluster registers an elevated financial stress score of 58.4/100 (MODERATE). High working capital friction, extended debtor days (avg 78-92 days), and raw material price pressures are tightening cash flow runways across micro and small enterprises.
+          </p>
+          
+          <div class="pt-2">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">Key Identified Root Causes</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs" id="insight-root-causes">
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="font-bold text-red-400">Receivables Lockup</div>
+                <div class="text-slate-400 text-[11px] mt-1">Corporate OEM credit terms stretched past 90 days.</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="font-bold text-orange-400">Input Cost Inflation</div>
+                <div class="text-slate-400 text-[11px] mt-1">Metals and energy costs unable to be passed downstream.</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="font-bold text-amber-400">Interest Debt Burden</div>
+                <div class="text-slate-400 text-[11px] mt-1">Debt service absorbing over 34% of operating cash flow.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">Priority Policy Interventions</h4>
+            <div class="space-y-2 text-xs" id="insight-policy-recs">
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 flex justify-between items-center">
+                <div>
+                  <div class="font-bold text-white">Mandatory TReDS Factoring Enforcement</div>
+                  <div class="text-[11px] text-slate-400">Ministry of MSME &amp; RBI &middot; Immediate (15 Days)</div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 text-[10px] font-bold">URGENT</span>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 flex justify-between items-center">
+                <div>
+                  <div class="font-bold text-white">Emergency Working Capital Liquidity Window</div>
+                  <div class="text-[11px] text-slate-400">SIDBI &amp; Commercial Banks &middot; 30 Days</div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold">HIGH</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 9: METHODOLOGY -->
+    <section id="tab-methodology" class="tab-content hidden space-y-6">
+      <div class="p-6 rounded-2xl border bg-slate-900/60 border-slate-800 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-white">System Architecture & Ethical Framework</h2>
+          <p class="text-xs text-slate-400 mt-1">How SME-SENTINEL blends macro indicators, cluster telemetry, and explainable ML.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <div class="font-bold text-amber-400 text-sm">1. Multi-Layer Feature Engine</div>
+            <p class="text-slate-400 leading-relaxed">Combines GST e-way bill volume indicators, power consumption indices, RBI MSME credit aggregates, and commodity pricing curves.</p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <div class="font-bold text-amber-400 text-sm">2. SHAP Explainability</div>
+            <p class="text-slate-400 leading-relaxed">No black box scoring. Every stress index point is decomposed into Shapley value contributions across liquidity, revenue, and debt factors.</p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+            <div class="font-bold text-amber-400 text-sm">3. Zero-PII Compliance</div>
+            <p class="text-slate-400 leading-relaxed">Full compliance with India's Digital Personal Data Protection (DPDP) Act 2023. Analysis occurs strictly on synthetic and cluster-aggregated data.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Guided Presentation Tour Modal -->
+  <div id="tour-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="max-w-lg w-full bg-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-amber-500 text-slate-950 text-xs font-bold flex items-center justify-center" id="tour-step-badge">1</span>
+          <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Demo Tour Step <span id="tour-step-num">1</span> of 5</span>
+        </div>
+        <button onclick="closeTour()" class="text-slate-400 hover:text-white cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-lg font-bold text-white" id="tour-title">National Early-Warning Dashboard</h3>
+        <p class="text-xs md:text-sm text-slate-300 leading-relaxed" id="tour-desc">
+          Welcome to SME-SENTINEL. The dashboard provides macroeconomic oversight of India's 6.3 Crore MSMEs, flagging stressed clusters 30-90 days before NPA triggers.
+        </p>
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="prevTourStep()" id="tour-btn-prev" class="px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-400 hover:text-white cursor-pointer disabled:opacity-40" disabled>Previous</button>
+        <button onclick="nextTourStep()" id="tour-btn-next" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-xs font-bold text-slate-950 cursor-pointer">Next Step</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 px-4 md:px-8 text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-5 h-5 rounded bg-amber-500 flex items-center justify-center text-[10px] font-bold text-slate-950">SS</div>
+        <span class="font-bold text-slate-300">SME-SENTINEL</span>
+        <span>&middot;</span>
+        <span>National AI-Powered SME Financial Stress Predictor</span>
+      </div>
+      <div class="text-[11px] text-slate-400">
+        Hackathon Demonstration &middot; Synthetic Data &middot; DPDP Act 2023 Compliant
+      </div>
+    </div>
+  </footer>
+
+  <!-- Live Application Script -->
+  <script>
+    // State & Data
+    const STATES_DATA = [
+      { id: 'GJ', name: 'Gujarat', score: 71.4, risk: 'high', credit: 54200, cluster: 'Surat Textiles & Diamond Polishing' },
+      { id: 'TN', name: 'Tamil Nadu', score: 68.2, risk: 'high', credit: 48900, cluster: 'Tiruppur Knitwear & Coimbatore Foundry' },
+      { id: 'PB', name: 'Punjab', score: 67.5, risk: 'high', credit: 29400, cluster: 'Ludhiana Hosiery & Auto Parts' },
+      { id: 'MH', name: 'Maharashtra', score: 64.1, risk: 'high', credit: 62000, cluster: 'Pune Auto Ancillary & Solapur Textiles' },
+      { id: 'UP', name: 'Uttar Pradesh', score: 63.8, risk: 'high', credit: 41500, cluster: 'Kanpur Leather & Moradabad Brassware' },
+      { id: 'WB', name: 'West Bengal', score: 61.2, risk: 'high', credit: 28300, cluster: 'Howrah Foundry & Jute Mills' },
+      { id: 'RJ', name: 'Rajasthan', score: 56.4, risk: 'moderate', credit: 24100, cluster: 'Jaipur Gems & Jodhpur Handicrafts' },
+      { id: 'KA', name: 'Karnataka', score: 54.0, risk: 'moderate', credit: 38200, cluster: 'Peenya Industrial & Belgaum Foundry' },
+      { id: 'TS', name: 'Telangana', score: 51.8, risk: 'moderate', credit: 26500, cluster: 'Hyderabad Bulk Drugs & Medak Engineering' },
+      { id: 'HR', name: 'Haryana', score: 59.3, risk: 'moderate', credit: 31200, cluster: 'Panipat Handlooms & Faridabad Forging' },
+    ];
+
+    const SECTORS_DATA = [
+      { id: 'textiles', name: 'Textiles & Garments', score: 78.2, risk: 'high', change: '+14.2%', note: 'Cotton yarn volatility & delayed EU receivables' },
+      { id: 'gems', name: 'Gems & Jewellery', score: 73.1, risk: 'high', change: '+12.1%', note: 'Lab diamond price drop & rough import curbs' },
+      { id: 'auto', name: 'Auto Components', score: 68.5, risk: 'high', change: '+9.8%', note: 'Extended OEM credit cycles (90-120 days)' },
+      { id: 'leather', name: 'Leather & Footwear', score: 66.4, risk: 'high', change: '+8.3%', note: 'Environmental compliance costs & export drop' },
+      { id: 'chemicals', name: 'Chemicals & Dyeing', score: 62.7, risk: 'high', change: '+7.1%', note: 'Feedstock import inflation & power tariffs' },
+      { id: 'metals', name: 'Foundry & Light Metals', score: 59.1, risk: 'moderate', change: '+5.4%', note: 'Pig iron spot spikes & scrap shortages' },
+      { id: 'plastics', name: 'Plastics & Polymers', score: 54.8, risk: 'moderate', change: '+4.0%', note: 'Crude polymer linkage volatility' },
+      { id: 'food', name: 'Food Processing', score: 48.2, risk: 'moderate', change: '+2.1%', note: 'Cold-chain energy tariffs' },
+      { id: 'pharma', name: 'Formulations / Pharma', score: 42.6, risk: 'moderate', change: '+1.5%', note: 'API import stability' },
+      { id: 'it', name: 'IT Services & BPO (MSME)', score: 36.4, risk: 'low', change: '-1.2%', note: 'Stable cloud subcontract margins' },
+    ];
+
+    const ALERTS_DATA = [
+      { region: 'Surat & South Gujarat', headline: 'Working capital runway below 21 days across 1,400+ weaving units', days: 30, urgency: 'critical', credit: '₹8,450 Cr' },
+      { region: 'Tiruppur Cluster, Tamil Nadu', headline: 'Delayed European retail receivables exceed 95 days statutory threshold', days: 45, urgency: 'high', credit: '₹6,200 Cr' },
+      { region: 'Ludhiana Industrial Area, Punjab', headline: 'Power duty tariff hikes squeezing operating margin to under 2.1%', days: 60, urgency: 'high', credit: '₹3,900 Cr' },
+      { region: 'Pune-Chakan Auto Belt, Maharashtra', headline: 'OEM credit stretch causing debt service coverage (DSCR) to dip to 1.05', days: 60, urgency: 'high', credit: '₹5,100 Cr' },
+      { region: 'Kanpur Jajmau Belt, Uttar Pradesh', headline: 'Effluent treatment power costs prompting partial factory curtailments', days: 75, urgency: 'moderate', credit: '₹2,400 Cr' },
+    ];
+
+    let currentRole = 'government';
+    let trendChartInstance = null;
+    let forecastChartInstance = null;
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderRankings();
+      renderStates();
+      renderSectors();
+      renderAlerts();
+      initTrendChart();
+    });
+
+    // Tab Navigation
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      const activeTab = document.getElementById('tab-' + tabId);
+      if (activeTab) activeTab.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'text-amber-400');
+        btn.classList.add('text-slate-400');
+      });
+      const activeNav = document.getElementById('nav-' + tabId);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-400');
+        activeNav.classList.add('bg-slate-800', 'text-amber-400');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (tabId === 'forecast' && !forecastChartInstance) {
+        setTimeout(initForecastChart, 50);
+      }
+    }
+
+    // Role Switching
+    function changeRole(role) {
+      currentRole = role;
+      const titleEl = document.getElementById('role-banner-title');
+      const descEl = document.getElementById('role-banner-desc');
+      const btnTextEl = document.getElementById('role-banner-btn-text');
+
+      if (role === 'government') {
+        titleEl.textContent = 'Government & Policy Directives';
+        descEl.textContent = '8 export clusters are tracking toward debt servicing breaches within 60 days. Immediate TReDS digital invoice discounting and state power duty relief recommended.';
+        btnTextEl.textContent = 'Simulate Economic Shock';
+      } else if (role === 'financial_institution') {
+        titleEl.textContent = 'Banking & Credit Risk Brief';
+        descEl.textContent = 'Aggregated ₹3.82 Lakh Cr MSME credit under pressure. Watchlist loans in Tiruppur textile mills and Surat diamond cutting units before NPA classification.';
+        btnTextEl.textContent = 'Stress Test Credit Portfolio';
+      } else {
+        titleEl.textContent = 'SME Business Sandbox Guidance';
+        descEl.textContent = 'Evaluate your own SME health score in the confidential sandbox to benchmark debtor days, DSCR, and access tailored debt restructuring steps.';
+        btnTextEl.textContent = 'Open SME Analyzer';
+      }
+    }
+
+    // Render Rankings
+    function renderRankings() {
+      const stateList = document.getElementById('state-ranking-list');
+      stateList.innerHTML = STATES_DATA.slice(0, 5).map((st, idx) => `
+        <div onclick="switchTab('map')" class="py-2.5 px-3 rounded-lg bg-slate-950/40 border border-slate-800/80 flex items-center justify-between text-xs hover:border-slate-700 transition-colors cursor-pointer">
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-slate-400 font-bold">#${idx+1}</span>
+            <div>
+              <div class="font-bold text-slate-200">${st.name} <span class="text-[10px] text-orange-400 uppercase font-semibold">(${st.risk})</span></div>
+              <div class="text-[11px] text-slate-400 truncate max-w-xs">${st.cluster}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-mono font-extrabold text-orange-400">${st.score.toFixed(1)}</div>
+            <div class="text-[10px] text-slate-400 font-mono">₹${st.credit.toLocaleString()} Cr</div>
+          </div>
+        </div>
+      `).join('');
+
+      const sectorList = document.getElementById('sector-ranking-list');
+      sectorList.innerHTML = SECTORS_DATA.slice(0, 5).map((sec, idx) => `
+        <div onclick="switchTab('sectors')" class="py-2.5 px-3 rounded-lg bg-slate-950/40 border border-slate-800/80 flex items-center justify-between text-xs hover:border-slate-700 transition-colors cursor-pointer">
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-slate-400 font-bold">#${idx+1}</span>
+            <div>
+              <div class="font-bold text-slate-200">${sec.name}</div>
+              <div class="text-[11px] text-slate-400 truncate max-w-xs">${sec.note}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-mono font-extrabold text-orange-400">${sec.score.toFixed(1)}</div>
+            <div class="text-[10px] text-slate-400 font-mono">${sec.change} MoM</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Render State Cards
+    function renderStates() {
+      const container = document.getElementById('all-states-grid');
+      container.innerHTML = STATES_DATA.map(st => `
+        <div class="state-card p-5 rounded-2xl border bg-slate-900/60 border-slate-800 hover:border-amber-500/50 transition-all space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-base">${st.name}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${st.risk === 'high' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${st.risk}</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div>
+              <span class="text-3xl font-extrabold font-mono text-amber-400">${st.score}</span>
+              <span class="text-xs text-slate-400 font-mono"> / 100</span>
+            </div>
+            <span class="text-xs font-mono text-slate-400">₹${st.credit.toLocaleString()} Cr at risk</span>
+          </div>
+          <div class="text-xs text-slate-400 pt-2 border-t border-slate-800">
+            <strong class="text-slate-300">Cluster:</strong> ${st.cluster}
+          </div>
+          <button onclick="switchTab('insights')" class="w-full mt-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-amber-400 font-medium transition-colors cursor-pointer">
+            View AI Briefing &rarr;
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // Filter States
+    function filterStateCards(query) {
+      const q = query.toLowerCase();
+      document.querySelectorAll('.state-card').forEach(card => {
+        card.style.display = card.textContent.toLowerCase().includes(q) ? 'block' : 'none';
+      });
+    }
+
+    // Render Sectors
+    function renderSectors() {
+      const container = document.getElementById('all-sectors-grid');
+      container.innerHTML = SECTORS_DATA.map(sec => `
+        <div class="p-5 rounded-2xl border bg-slate-900/60 border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-base">${sec.name}</span>
+            <span class="font-mono text-xs font-bold text-orange-400">${sec.change}</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold font-mono text-amber-400">${sec.score}</span>
+            <span class="text-xs text-slate-400 font-mono">/ 100 Stress Index</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">${sec.note}</p>
+          <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-amber-500 to-red-500" style="width: ${sec.score}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Render Alerts
+    function renderAlerts() {
+      const container = document.getElementById('alerts-container');
+      container.innerHTML = ALERTS_DATA.map(alt => `
+        <div class="p-5 rounded-2xl border bg-slate-900/60 border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${alt.urgency === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}">${alt.urgency}</span>
+              <span class="font-bold text-slate-200 text-xs">${alt.region}</span>
+            </div>
+            <p class="text-xs md:text-sm text-slate-300">${alt.headline}</p>
+          </div>
+          <div class="flex items-center gap-4 shrink-0 text-right">
+            <div>
+              <div class="text-xs text-slate-400 font-mono">Exposure</div>
+              <div class="font-mono font-bold text-amber-400 text-sm">${alt.credit}</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center min-w-[70px]">
+              <div class="text-base font-extrabold font-mono text-red-400">${alt.days}d</div>
+              <div class="text-[9px] text-slate-400 uppercase font-bold">Horizon</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Trend Chart Initialization
+    function initTrendChart() {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      trendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct (Now)', 'Nov (+30d)', 'Dec (+60d)', 'Jan (+90d)'],
+          datasets: [
+            {
+              label: 'Actual Stress',
+              data: [48.2, 50.8, 53.1, 55.4, 57.0, 58.4, null, null, null],
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.15)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointBackgroundColor: '#f59e0b',
+            },
+            {
+              label: 'Predicted Trajectory Cone',
+              data: [null, null, null, null, null, 58.4, 62.1, 67.5, 71.8],
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              borderDash: [5, 5],
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointBackgroundColor: '#ef4444',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', font: { size: 10 } }
+            },
+            y: {
+              min: 30,
+              max: 90,
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    function initForecastChart() {
+      const ctx = document.getElementById('forecastEngineChart').getContext('2d');
+      forecastChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Oct (Current)', 'Nov (+30d)', 'Dec (+60d)', 'Jan (+90d)'],
+          datasets: [
+            {
+              label: 'Upper Bound',
+              data: [62, 65.8, 72.3, 77.4],
+              borderColor: 'transparent',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              fill: '+1',
+              pointRadius: 0,
+            },
+            {
+              label: 'Mean Forecast',
+              data: [58.4, 62.1, 67.5, 71.8],
+              borderColor: '#f59e0b',
+              borderWidth: 3,
+              pointRadius: 4,
+              pointBackgroundColor: '#f59e0b',
+            },
+            {
+              label: 'Lower Bound',
+              data: [55, 58.5, 62.8, 66.2],
+              borderColor: 'transparent',
+              backgroundColor: 'transparent',
+              pointRadius: 0,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+            y: { min: 40, max: 90, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } }
+          }
+        }
+      });
+    }
+
+    // SME Health Sandbox Calculator
+    function calculateSMEHealth() {
+      const dso = parseFloat(document.getElementById('input-dso').value) || 60;
+      const growth = parseFloat(document.getElementById('input-growth').value) || 0;
+      const margin = parseFloat(document.getElementById('input-margin').value) || 5;
+      const dscr = parseFloat(document.getElementById('input-dscr').value) || 1.2;
+      const runway = parseFloat(document.getElementById('input-runway').value) || 2;
+
+      let score = 50;
+      if (dso > 60) score += (dso - 60) * 0.45;
+      if (growth < 0) score += Math.abs(growth) * 0.7;
+      if (margin < 5) score += (5 - margin) * 2.2;
+      if (dscr < 1.2) score += (1.2 - dscr) * 35;
+      if (runway < 2) score += (2 - runway) * 8;
+
+      score = Math.min(96, Math.max(15, Math.round(score * 10) / 10));
+      const prob = Math.min(99, Math.max(10, Math.round((score * 1.08) * 10) / 10));
+
+      document.getElementById('res-score').innerHTML = `${score} <span class="text-xs font-sans text-slate-400">/ 100</span>`;
+      document.getElementById('res-prob').textContent = `${prob}%`;
+
+      const badge = document.getElementById('res-badge');
+      if (score > 75) {
+        badge.textContent = 'CRITICAL STRESS RISK';
+        badge.className = 'text-xs font-bold text-red-400 uppercase mt-0.5';
+      } else if (score > 60) {
+        badge.textContent = 'HIGH STRESS RISK';
+        badge.className = 'text-xs font-bold text-orange-400 uppercase mt-0.5';
+      } else {
+        badge.textContent = 'MODERATE RISK';
+        badge.className = 'text-xs font-bold text-amber-400 uppercase mt-0.5';
+      }
+    }
+
+    // Crisis Simulator
+    function updateSimulation() {
+      const rate = parseFloat(document.getElementById('slider-rate').value);
+      const mat = parseFloat(document.getElementById('slider-mat').value);
+      const demand = parseFloat(document.getElementById('slider-demand').value);
+      const delay = parseFloat(document.getElementById('slider-delay').value);
+
+      document.getElementById('val-rate').textContent = (rate >= 0 ? '+' : '') + rate + ' bps';
+      document.getElementById('val-mat').textContent = (mat >= 0 ? '+' : '') + mat + '%';
+      document.getElementById('val-demand').textContent = (demand >= 0 ? '+' : '') + demand + '%';
+      document.getElementById('val-delay').textContent = (delay >= 0 ? '+' : '') + delay + ' days';
+
+      const baseline = 58.4;
+      const delta = (rate / 100) * 3.8 + (mat * 0.62) + (Math.abs(demand) * 0.68) + (delay * 0.35);
+      const sim = Math.min(98, Math.max(15, Math.round((baseline + delta) * 10) / 10));
+      const roundDelta = Math.round((sim - baseline) * 10) / 10;
+
+      document.getElementById('sim-score').textContent = sim.toFixed(1);
+      document.getElementById('sim-delta').textContent = `(${roundDelta >= 0 ? '+' : ''}${roundDelta.toFixed(1)} delta)`;
+
+      const buffer = Math.round(45000 + (delta * 3200));
+      document.getElementById('sim-buffer').textContent = '₹' + buffer.toLocaleString() + ' Cr';
+
+      const summaryEl = document.getElementById('sim-summary');
+      if (sim > 75) {
+        summaryEl.textContent = `CRITICAL SYSTEMIC STRESS: Under this scenario, the national MSME stress index reaches ${sim.toFixed(1)}. Over 45% of manufacturing units would breach debt service limits within 60 days, necessitating ₹${buffer.toLocaleString()} Cr emergency credit support.`;
+      } else {
+        summaryEl.textContent = `ELEVATED STRESS THRESHOLD: Stress expands to ${sim.toFixed(1)}. Working-capital depletion accelerates in textile and auto ancillary belts. Immediate TReDS digital invoice discounting advised.`;
+      }
+    }
+
+    function applyPreset(preset) {
+      if (preset === 'export_collapse') {
+        document.getElementById('slider-rate').value = 50;
+        document.getElementById('slider-mat').value = 15;
+        document.getElementById('slider-demand').value = -25;
+        document.getElementById('slider-delay').value = 30;
+      } else if (preset === 'rate_spike') {
+        document.getElementById('slider-rate').value = 250;
+        document.getElementById('slider-mat').value = 5;
+        document.getElementById('slider-demand').value = -5;
+        document.getElementById('slider-delay').value = 10;
+      } else {
+        document.getElementById('slider-rate').value = 100;
+        document.getElementById('slider-mat').value = 10;
+        document.getElementById('slider-demand').value = -10;
+        document.getElementById('slider-delay').value = 15;
+      }
+      updateSimulation();
+    }
+
+    // AI Insight Generator
+    function regenerateInsight() {
+      const times = ['05:35 PM IST', '05:38 PM IST', '05:40 PM IST'];
+      document.getElementById('insight-time').textContent = 'Today, ' + times[Math.floor(Math.random() * times.length)];
+      alert('AI Policy Briefing updated with latest cluster signals and macroeconomic factors.');
+    }
+
+    // Presentation Tour Modal Steps
+    const tourSteps = [
+      {
+        step: 1,
+        title: "National SME Early-Warning Intelligence",
+        desc: "SME-SENTINEL aggregates MSME signals across 15 states and 10 manufacturing sectors, predicting stress transitions 30-90 days in advance.",
+        tab: "dashboard"
+      },
+      {
+        step: 2,
+        title: "Granular Regional & Cluster Heatmap",
+        desc: "Inspect localized stress across critical export clusters such as Surat, Tiruppur, Ludhiana, and Kanpur, mapped against loan exposures.",
+        tab: "map"
+      },
+      {
+        step: 3,
+        title: "Confidential SME Health Sandbox",
+        desc: "MSME proprietors can stress-test their own balance sheets without sharing sensitive data, receiving instant AI-tailored restructuring steps.",
+        tab: "analyzer"
+      },
+      {
+        step: 4,
+        title: "Macroeconomic Shock Simulator",
+        desc: "Policy makers and bank risk officers can stress-test the entire national economy against interest rate hikes, input inflation, and export slowdowns.",
+        tab: "simulator"
+      },
+      {
+        step: 5,
+        title: "AI Policy Memos & Regulatory Compliance",
+        desc: "Autonomous synthesis of actionable policy interventions backed by SHAP explainability and 100% compliance with India's DPDP Act 2023.",
+        tab: "insights"
+      }
+    ];
+
+    let currentTourStep = 0;
+
+    function openTour() {
+      currentTourStep = 0;
+      showTourStep();
+      document.getElementById('tour-modal').classList.remove('hidden');
+    }
+
+    function closeTour() {
+      document.getElementById('tour-modal').classList.add('hidden');
+    }
+
+    function showTourStep() {
+      const data = tourSteps[currentTourStep];
+      document.getElementById('tour-step-badge').textContent = data.step;
+      document.getElementById('tour-step-num').textContent = data.step;
+      document.getElementById('tour-title').textContent = data.title;
+      document.getElementById('tour-desc').textContent = data.desc;
+      document.getElementById('tour-btn-prev').disabled = currentTourStep === 0;
+      document.getElementById('tour-btn-next').textContent = currentTourStep === tourSteps.length - 1 ? 'Finish Tour' : 'Next Step';
+      switchTab(data.tab);
+    }
+
+    function nextTourStep() {
+      if (currentTourStep < tourSteps.length - 1) {
+        currentTourStep++;
+        showTourStep();
+      } else {
+        closeTour();
+      }
+    }
+
+    function prevTourStep() {
+      if (currentTourStep > 0) {
+        currentTourStep--;
+        showTourStep();
+      }
+    }
+
+    // Toggle Theme
+    function toggleTheme() {
+      document.body.classList.toggle('bg-slate-950');
+      document.body.classList.toggle('bg-slate-900');
+    }
+  </script>
+</body>
+</html>

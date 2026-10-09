@@ -1,4 +1,4 @@
-import { CrisisScenarioParams, SimulationResult } from '../types';
+import { CrisisScenarioParams, SimulationResult, InterventionParams, InterventionSimulationResult } from '../types';
 import { NATIONAL_OVERVIEW, SECTORS_DATA, STATES_DATA } from '../data/indiaData';
 import { getRiskLevel } from './mlEngine';
 
@@ -101,3 +101,160 @@ export function runCrisisSimulation(params: CrisisScenarioParams): SimulationRes
     recommendedBufferCr,
   };
 }
+
+export function runInterventionSimulation(
+  params: InterventionParams,
+  baselineScoreOverride?: number
+): InterventionSimulationResult {
+  const baselineScore = baselineScoreOverride !== undefined ? baselineScoreOverride : NATIONAL_OVERVIEW.stressScore;
+
+  // Compute individual policy transmission effects
+  const eclgsRelief = (params.eclgsCreditExpansionPct / 10) * 3.8; // emergency credit line
+  const tredsRelief = (params.tredsEnforcementPct / 10) * 3.4; // factoring & delayed receivables
+  const subventionRelief = (params.interestSubventionBps / 100) * 4.4; // rate subvention
+  const moratoriumRelief = params.debtMoratoriumMonths * 2.2; // principal moratorium
+  const cgtmseRelief = (params.cgtmseCoveragePct / 10) * 1.6; // credit guarantee fee waiver
+  const gstRelief = (params.gstRefundAccelerationDays / 15) * 1.7; // accelerated tax credits
+  const opexRelief = (params.opexRationalizationPct / 5) * 1.5; // cost efficiency
+  const powerRelief = (params.powerTariffSubsidyPct / 5) * 1.4; // energy & logistics rebate
+
+  const rawRelief = eclgsRelief + tredsRelief + subventionRelief + moratoriumRelief + cgtmseRelief + gstRelief + opexRelief + powerRelief;
+
+  // Diminishing returns curve so simultaneous interventions compound realistically
+  const effectiveRelief = Math.min(baselineScore - 14, Math.round((rawRelief * 0.74) * 10) / 10);
+  const postInterventionScore = Math.max(14.0, Math.round((baselineScore - effectiveRelief) * 10) / 10);
+  const stressReliefDelta = Math.round((postInterventionScore - baselineScore) * 10) / 10;
+
+  const baselineRiskLevel = getRiskLevel(baselineScore);
+  const postInterventionRiskLevel = getRiskLevel(postInterventionScore);
+
+  // Scaled baseline credit at risk
+  const scaling = baselineScore / NATIONAL_OVERVIEW.stressScore;
+  const currentCreditAtRisk = Math.round(NATIONAL_OVERVIEW.creditAtRiskCr * scaling);
+
+  // Credit preserved from NPA (₹ Cr)
+  const reliefFraction = effectiveRelief / Math.max(1, baselineScore);
+  const creditPreservedCr = Math.round(currentCreditAtRisk * Math.min(0.72, reliefFraction * 1.25));
+
+  // Liquidity injected into real economy (₹ Cr)
+  const liquidityInjectedCr = Math.round(
+    (params.eclgsCreditExpansionPct * 4800) +
+    (params.tredsEnforcementPct * 1350) +
+    (params.gstRefundAccelerationDays * 380) +
+    (params.debtMoratoriumMonths * 5200)
+  );
+
+  // Estimated fiscal cost to exchequer / banks (₹ Cr)
+  const subventionCost = (params.interestSubventionBps / 100) * 3100;
+  const guaranteeCost = (params.cgtmseCoveragePct / 10) * 450;
+  const powerCost = (params.powerTariffSubsidyPct / 5) * 890;
+  const totalInterventionCostCr = Math.max(450, Math.round(subventionCost + guaranteeCost + powerCost + 750));
+
+  // Multiplier / Benefit-to-Cost ROI
+  const roiRatio = Math.round((creditPreservedCr / totalInterventionCostCr) * 10) / 10;
+
+  // Enterprises saved and employment protected
+  const enterprisesSavedCount = Math.round(creditPreservedCr * 8.4);
+  const jobsProtectedCount = Math.round(enterprisesSavedCount * 13.8);
+
+  // Sector-level relief projection
+  const sectorRelief = SECTORS_DATA.map((s) => {
+    let sectorElasticity = 1.0;
+    if (s.id === 'textiles') sectorElasticity = 1.42;
+    else if (s.id === 'auto_components') sectorElasticity = 1.36;
+    else if (s.id === 'chemicals') sectorElasticity = 1.28;
+    else if (s.id === 'gems_jewellery') sectorElasticity = 1.34;
+    else if (s.id === 'ceramics_construction') sectorElasticity = 1.22;
+    else if (s.id === 'electronics') sectorElasticity = 1.10;
+    else if (s.id === 'it_services_msme') sectorElasticity = 0.65;
+    else if (s.id === 'food_processing') sectorElasticity = 0.88;
+
+    const sectorReliefPoints = Math.round(effectiveRelief * sectorElasticity * 10) / 10;
+    const simSectorScore = Math.max(12, Math.min(99, Math.round((s.stressScore - sectorReliefPoints) * 10) / 10));
+
+    return {
+      sector: s.name,
+      beforeScore: s.stressScore,
+      afterScore: simSectorScore,
+      reliefPoints: sectorReliefPoints,
+      riskStatus: getRiskLevel(simSectorScore),
+    };
+  }).sort((a, b) => b.reliefPoints - a.reliefPoints);
+
+  // State-level relief projection
+  const stateRelief = STATES_DATA.map((st) => {
+    let stateElasticity = 1.0;
+    if (st.code === 'GJ' || st.code === 'TN') stateElasticity = 1.32;
+    else if (st.code === 'PB' || st.code === 'MH') stateElasticity = 1.24;
+    else if (st.code === 'UP') stateElasticity = 1.18;
+    else if (st.code === 'WB') stateElasticity = 1.10;
+    else if (st.code === 'KA' || st.code === 'TS') stateElasticity = 0.82;
+
+    const stateReliefPoints = Math.round(effectiveRelief * stateElasticity * 10) / 10;
+    const simStateScore = Math.max(12, Math.min(99, Math.round((st.stressScore - stateReliefPoints) * 10) / 10));
+
+    return {
+      state: st.name,
+      beforeScore: st.stressScore,
+      afterScore: simStateScore,
+      reliefPoints: stateReliefPoints,
+      riskStatus: getRiskLevel(simStateScore),
+    };
+  }).sort((a, b) => b.reliefPoints - a.reliefPoints);
+
+  // Policy Brief Summary
+  let policyBriefSummary = '';
+  if (effectiveRelief >= 18) {
+    policyBriefSummary = `TRANSFORMATIVE SYSTEMIC RESCUE: Deployed intervention levers compress national MSME stress by ${effectiveRelief.toFixed(1)} points (from ${baselineScore.toFixed(1)} down to ${postInterventionScore.toFixed(1)}). The package injects ₹${liquidityInjectedCr.toLocaleString()} Cr in direct liquidity, safeguarding ₹${creditPreservedCr.toLocaleString()} Cr of vulnerable bank credit with an estimated benefit-to-cost multiplier of ${roiRatio}x.`;
+  } else if (effectiveRelief >= 10) {
+    policyBriefSummary = `SUBSTANTIAL STABILIZATION: Countermeasures reduce aggregate stress by ${effectiveRelief.toFixed(1)} points to ${postInterventionScore.toFixed(1)}. Working capital friction eases across core industrial belts in Gujarat, Tamil Nadu, and Maharashtra, protecting an estimated ${enterprisesSavedCount.toLocaleString()} MSME units from NPA reclassification.`;
+  } else if (effectiveRelief > 0) {
+    policyBriefSummary = `TARGETED BUFFER: Policy intervention provides moderate relief of ${effectiveRelief.toFixed(1)} points. Additional credit guarantee or TReDS invoice discounting enforcement is recommended to prevent spillover in higher-leverage sectors.`;
+  } else {
+    policyBriefSummary = `BASELINE STABILITY: No active counter-intervention levers selected. Baseline stress remains at ${baselineScore.toFixed(1)}. Adjust policy sliders to simulate relief impact.`;
+  }
+
+  // Implementation Roadmap
+  const actionRoadmap = [
+    {
+      phase: 'Phase 1: Immediate Directives',
+      timeframe: 'Days 1 – 15',
+      title: 'Regulatory Notification & Credit Window Activation',
+      description: `RBI and MSME Ministry issue notification for ${params.eclgsCreditExpansionPct > 0 ? `${params.eclgsCreditExpansionPct}% ECLGS credit top-up` : 'liquidity window'} and mandatory 45-day TReDS discounting on public procurement.`,
+      leadAgency: 'RBI / Ministry of MSME / GeM',
+    },
+    {
+      phase: 'Phase 2: Bank Disbursement',
+      timeframe: 'Days 16 – 45',
+      title: 'Scheduled Commercial Bank Credit Deployment',
+      description: `Public and private sector banks operationalize interest subvention (${params.interestSubventionBps} bps) and credit guarantee expansion (${params.cgtmseCoveragePct}% CGTMSE cover) without requiring additional collateral.`,
+      leadAgency: "Indian Banks' Association / SIDBI",
+    },
+    {
+      phase: 'Phase 3: Cluster Verification',
+      timeframe: 'Days 46 – 90',
+      title: 'Field Auditing & Macroeconomic Stress Re-assessment',
+      description: 'District Industries Centres (DIC) and SLBCs audit debtor velocity and re-run early warning models to ensure SME defaults are contained below benchmark thresholds.',
+      leadAgency: 'State Level Bankers’ Committee (SLBC)',
+    },
+  ];
+
+  return {
+    baselineStressScore: baselineScore,
+    postInterventionScore,
+    stressReliefDelta,
+    baselineRiskLevel,
+    postInterventionRiskLevel,
+    creditPreservedCr,
+    enterprisesSavedCount,
+    jobsProtectedCount,
+    totalInterventionCostCr,
+    roiRatio,
+    liquidityInjectedCr,
+    sectorRelief,
+    stateRelief,
+    policyBriefSummary,
+    actionRoadmap,
+  };
+}
+

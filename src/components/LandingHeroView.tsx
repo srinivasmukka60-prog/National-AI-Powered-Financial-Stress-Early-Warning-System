@@ -16,13 +16,12 @@ import {
 interface LandingHeroViewProps {
   darkMode: boolean;
   onNavigate: (tab: string) => void;
-  onOpenTour: () => void;
+  onOpenTour?: () => void;
 }
 
 export const LandingHeroView: React.FC<LandingHeroViewProps> = ({
   darkMode,
   onNavigate,
-  onOpenTour,
 }) => {
   const workflowSteps = [
     {
@@ -106,11 +105,11 @@ export const LandingHeroView: React.FC<LandingHeroViewProps> = ({
             </button>
 
             <button
-              onClick={onOpenTour}
-              className="px-4 py-3 rounded-xl border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
+              onClick={() => onNavigate('analyzer')}
+              className="px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm transition-all shadow-md flex items-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Judge Demo Tour</span>
+              <span>AI Risk Score</span>
             </button>
           </div>
         </div>

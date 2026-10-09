@@ -1,4 +1,4 @@
-import { StateData, SectorData, EarlyWarningAlert, NationalShockPreset } from '../types';
+import { StateData, SectorData, EarlyWarningAlert, NationalShockPreset, InterventionPreset } from '../types';
 
 export const NATIONAL_OVERVIEW = {
   stressScore: 58.4,
@@ -841,6 +841,103 @@ export const STATES_DATA: StateData[] = [
   },
 ];
 
+// Real geographic latitude & longitude coordinates for Indian states and union territories
+export const STATE_GEO_COORDS: Record<string, [number, number]> = {
+  GJ: [22.2587, 71.1924],
+  TN: [11.1271, 78.6569],
+  MH: [19.7515, 75.7139],
+  UP: [26.8467, 80.9462],
+  PB: [31.1471, 75.3412],
+  RJ: [27.0238, 74.2179],
+  KA: [15.3173, 75.7139],
+  TS: [18.1124, 79.0193],
+  WB: [22.9868, 87.8550],
+  HR: [29.0588, 76.0856],
+  DL: [28.7041, 77.1025],
+  MP: [22.9734, 78.6569],
+  AP: [15.9129, 79.7400],
+  KL: [10.8505, 76.2711],
+  OD: [20.9517, 85.0985],
+  CG: [21.2787, 81.8661],
+  JH: [23.6102, 85.2799],
+  BR: [25.0961, 85.3131],
+  AS: [26.2006, 92.9376],
+  UK: [30.0668, 79.0193],
+  HP: [31.1048, 77.1734],
+  GA: [15.2993, 74.1240],
+};
+
+// Real geographic latitude & longitude coordinates for industrial district clusters
+export const DISTRICT_GEO_COORDS: Record<string, [number, number]> = {
+  'GJ-SUR': [21.1702, 72.8311],
+  'GJ-MOR': [22.8173, 70.8370],
+  'GJ-ANK': [21.6264, 73.0033],
+  'GJ-RAJ': [22.3039, 70.8022],
+  'GJ-AHM': [23.0225, 72.5714],
+  'TN-TIR': [11.1085, 77.3411],
+  'TN-COI': [11.0168, 76.9558],
+  'TN-CHE': [12.9716, 79.9419],
+  'TN-RAN': [12.7892, 78.7118],
+  'MH-PUN': [18.7606, 73.8567],
+  'MH-ICH': [16.6944, 74.4608],
+  'MH-AUR': [19.8762, 75.3433],
+  'MH-NAS': [19.9975, 73.7898],
+  'UP-KAN': [26.4499, 80.3319],
+  'UP-MOR': [28.8386, 78.7733],
+  'UP-VAR': [25.3176, 82.9739],
+  'UP-AGR': [27.1767, 78.0081],
+  'UP-NOI': [28.5355, 77.3910],
+  'PB-LUD': [30.9010, 75.8573],
+  'PB-JAL': [31.3260, 75.5762],
+  'PB-AMR': [31.6340, 74.8723],
+  'PB-MAN': [30.6657, 76.3056],
+  'RJ-BHI': [25.3475, 74.6408],
+  'RJ-JAI': [26.8206, 75.8458],
+  'RJ-JOD': [26.2389, 73.0243],
+  'RJ-KIS': [26.5796, 74.8647],
+  'KA-BLR': [13.0285, 77.5197],
+  'KA-BEL': [15.8497, 74.4977],
+  'KA-MYS': [12.2958, 76.6394],
+  'TS-HYD': [17.4704, 78.4489],
+  'TS-MED': [18.0478, 78.2618],
+  'WB-HOW': [22.5958, 88.2636],
+  'WB-DUR': [23.5204, 87.3119],
+  'WB-SIL': [26.7271, 88.3953],
+  'HR-PAN': [29.3909, 76.9635],
+  'HR-GUR': [28.3540, 76.9388],
+  'HR-FAR': [28.4089, 77.3178],
+  'DL-OKH': [28.5307, 77.2713],
+  'DL-NAR': [28.8471, 77.0984],
+  'MP-IND': [22.6144, 75.6881],
+  'MP-BHO': [23.0645, 77.5255],
+  'AP-VIZ': [17.6868, 83.2185],
+  'AP-VIJ': [16.5062, 80.6480],
+  'KL-KOC': [9.9312, 76.2673],
+  'KL-ALA': [9.4981, 76.3388],
+  'OD-ROU': [22.2604, 84.8536],
+  'OD-CUT': [20.4625, 85.8828],
+  'CG-BHI': [21.1938, 81.3509],
+  'JH-JAM': [22.8046, 86.2029],
+  'JH-DHN': [23.7957, 86.4304],
+  'BR-PAT': [25.5941, 85.1376],
+  'AS-GUW': [26.1445, 91.7362],
+  'UK-PAN': [29.0232, 79.4892],
+  'HP-BAD': [30.9578, 76.7914],
+  'GA-VER': [15.3582, 73.9311],
+};
+
+// Enrich STATES_DATA with real coordinates
+STATES_DATA.forEach((st) => {
+  if (STATE_GEO_COORDS[st.id]) {
+    st.geoCoord = STATE_GEO_COORDS[st.id];
+  }
+  st.districts.forEach((d) => {
+    if (DISTRICT_GEO_COORDS[d.id]) {
+      d.geoCoord = DISTRICT_GEO_COORDS[d.id];
+    }
+  });
+});
+
 // Supply chain contagion vectors connecting major economic hubs across India
 export const SUPPLY_CHAIN_VECTORS = [
   { id: 'vec-cotton', fromState: 'GJ', toState: 'TN', label: 'Cotton Fiber ➔ Knitwear Processing', intensity: 'high', commodities: 'Raw Cotton / Combed Yarn' },
@@ -1046,3 +1143,75 @@ export const NATIONAL_SHOCK_PRESETS: NationalShockPreset[] = [
     },
   },
 ];
+
+export const INTERVENTION_PACKAGES: InterventionPreset[] = [
+  {
+    id: 'national_liquidity_shield',
+    title: 'National MSME Liquidity Shield',
+    description: 'Comprehensive multi-agency policy package deploying 20% emergency working capital top-up, 50% TReDS settlement acceleration, and 200 bps interest subvention with a 3-month moratorium.',
+    badge: 'Fiscal & Monetary Shield',
+    authority: 'Ministry of MSME & Reserve Bank of India',
+    params: {
+      eclgsCreditExpansionPct: 20,
+      tredsEnforcementPct: 50,
+      interestSubventionBps: 200,
+      debtMoratoriumMonths: 3,
+      cgtmseCoveragePct: 75,
+      gstRefundAccelerationDays: 30,
+      opexRationalizationPct: 10,
+      powerTariffSubsidyPct: 15,
+    },
+  },
+  {
+    id: 'export_cluster_rescue',
+    title: 'Export Cluster Rescue & Forex Buffer',
+    description: 'Targeted support for export-intensive apparel, leather, gems, and engineering MSMEs: 300 bps interest equalization, fast-tracked 45-day GST refunds, and power/freight rebates.',
+    badge: 'Export Competitiveness',
+    authority: 'Ministry of Commerce & DGFT',
+    params: {
+      eclgsCreditExpansionPct: 15,
+      tredsEnforcementPct: 60,
+      interestSubventionBps: 300,
+      debtMoratoriumMonths: 3,
+      cgtmseCoveragePct: 65,
+      gstRefundAccelerationDays: 45,
+      opexRationalizationPct: 12,
+      powerTariffSubsidyPct: 25,
+    },
+  },
+  {
+    id: 'prompt_payment_treds',
+    title: 'MSME Samadhaan Strict Payment Mandate',
+    description: 'Strict regulatory enforcement of the 45-day MSME prompt payment mandate under Section 15 with automated GeM/TReDS factoring, unlocking 75% of trapped receivables.',
+    badge: 'Receivables Clearance',
+    authority: 'Ministry of Corporate Affairs & Samadhaan',
+    params: {
+      eclgsCreditExpansionPct: 10,
+      tredsEnforcementPct: 75,
+      interestSubventionBps: 100,
+      debtMoratoriumMonths: 0,
+      cgtmseCoveragePct: 50,
+      gstRefundAccelerationDays: 35,
+      opexRationalizationPct: 8,
+      powerTariffSubsidyPct: 10,
+    },
+  },
+  {
+    id: 'banking_restructuring_relief',
+    title: 'SME Covenant Restructuring & Bailout',
+    description: 'Banking regulatory forbearance allowing 6-month loan principal repayment moratorium, credit guarantee cover boosted to 85%, and 250 bps interest rate concessions to prevent SMA slippage.',
+    badge: 'Banking & Covenant Relief',
+    authority: "Indian Banks' Association (IBA) & SIDBI",
+    params: {
+      eclgsCreditExpansionPct: 25,
+      tredsEnforcementPct: 40,
+      interestSubventionBps: 250,
+      debtMoratoriumMonths: 6,
+      cgtmseCoveragePct: 85,
+      gstRefundAccelerationDays: 20,
+      opexRationalizationPct: 15,
+      powerTariffSubsidyPct: 12,
+    },
+  },
+];
+

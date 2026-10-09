@@ -14,10 +14,14 @@ import {
   Layers,
   MapPin,
   Flame,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface CrisisSimulatorViewProps {
   darkMode: boolean;
+  onNavigate?: (tab: string) => void;
+  initialPresetId?: string | null;
+  presetTimestamp?: number;
 }
 
 const DEFAULT_PARAMS: CrisisScenarioParams = {
@@ -30,9 +34,25 @@ const DEFAULT_PARAMS: CrisisScenarioParams = {
   loanAmountMultiplier: 1.0,
 };
 
-export const CrisisSimulatorView: React.FC<CrisisSimulatorViewProps> = ({ darkMode }) => {
+export const CrisisSimulatorView: React.FC<CrisisSimulatorViewProps> = ({
+  darkMode,
+  onNavigate,
+  initialPresetId,
+  presetTimestamp,
+}) => {
   const [params, setParams] = useState<CrisisScenarioParams>(DEFAULT_PARAMS);
-  const [activePresetId, setActivePresetId] = useState<string | null>(null);
+  const [activePresetId, setActivePresetId] = useState<string | null>(initialPresetId || null);
+
+  // Apply initial preset if triggered by search bar or navigation
+  React.useEffect(() => {
+    if (initialPresetId) {
+      const match = NATIONAL_SHOCK_PRESETS.find((p) => p.id === initialPresetId);
+      if (match) {
+        setActivePresetId(match.id);
+        setParams(match.params);
+      }
+    }
+  }, [initialPresetId, presetTimestamp]);
 
   const result = runCrisisSimulation(params);
 
@@ -445,6 +465,36 @@ export const CrisisSimulatorView: React.FC<CrisisSimulatorViewProps> = ({ darkMo
           </div>
         </div>
       </div>
+
+      {/* Countermeasure CTA */}
+      <div className={`p-4 md:p-5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors ${
+        darkMode ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200'
+      }`}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          </div>
+          <div>
+            <h4 className={`text-xs md:text-sm font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              Want to simulate policy interventions to counteract this crisis?
+            </h4>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Test how ECLGS liquidity top-ups, TReDS receivables clearing, and RBI interest subventions can mitigate simulated stress.
+            </p>
+          </div>
+        </div>
+
+        {onNavigate && (
+          <button
+            onClick={() => onNavigate('intervention')}
+            className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 shadow-md"
+          >
+            <span>Launch Intervention Simulator</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
+      </div>
     </div>
   );
 };
+

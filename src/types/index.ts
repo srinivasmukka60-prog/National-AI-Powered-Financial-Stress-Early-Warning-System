@@ -12,6 +12,7 @@ export interface DistrictData {
   mainSectors: string[];
   dominantIssue: string;
   totalMSMEs: number;
+  geoCoord?: [number, number]; // [lat, lng]
 }
 
 export interface StateData {
@@ -34,6 +35,7 @@ export interface StateData {
   // SVG boundary data
   svgPath: string;
   labelCoord: [number, number]; // [x, y]
+  geoCoord?: [number, number]; // [lat, lng]
 }
 
 export interface SectorData {
@@ -168,3 +170,112 @@ export interface SimulationResult {
   impactSummary: string;
   recommendedBufferCr: number;
 }
+
+export type CreditRiskGrade = 'AAA' | 'AA' | 'A' | 'BBB' | 'BB' | 'B' | 'CCC' | 'D';
+
+export interface AIRiskScoreResult {
+  overallScore: number; // 0 - 100 scale (higher = higher financial default risk)
+  riskGrade: CreditRiskGrade;
+  riskLevel: RiskLevel;
+  confidenceLevel: number; // 0 - 100 %
+  subScores: {
+    liquidityRisk: number; // 0 - 100
+    debtSolvencyRisk: number; // 0 - 100
+    operationalEfficiencyRisk: number; // 0 - 100
+    supplyChainExposure: number; // 0 - 100
+    marketMacroRisk: number; // 0 - 100
+  };
+  executiveSummary: string;
+  keyStrengths: string[];
+  criticalVulnerabilities: string[];
+  earlyWarningSignals: string[];
+  prescriptiveMitigations: {
+    action: string;
+    priority: 'immediate' | 'medium-term' | 'strategic';
+    expectedRiskReductionPoints: number;
+    details: string;
+  }[];
+  stressTolerance: {
+    rateHikeToleranceBps: number;
+    revenueDropTolerancePct: number;
+    paymentDelayBufferDays: number;
+  };
+  timestamp: string;
+  isAiGenerated: boolean;
+}
+
+export interface CFOAdvisoryResult {
+  replyText: string;
+  diagnosis: string;
+  immediateActions: string[];
+  mediumTermStrategies: string[];
+  recommendedSchemes: { name: string; benefit: string; agency: string }[];
+  projectedMetricImpact: { metric: string; before: string; after: string; impact: string }[];
+  cfoVerdict: 'Urgent Intervention Needed' | 'Moderate Liquidity Optimization' | 'Capital Expansion Ready';
+  isAiGenerated: boolean;
+}
+
+export interface CFOMessage {
+  id: string;
+  sender: 'user' | 'cfo';
+  text: string;
+  timestamp: string;
+  advisory?: CFOAdvisoryResult;
+}
+
+export interface InterventionParams {
+  eclgsCreditExpansionPct: number; // 0 to 30% emergency credit line / working capital top-up
+  tredsEnforcementPct: number; // 0 to 80% receivables discounted & accelerated
+  interestSubventionBps: number; // 0 to 400 bps interest rate relief
+  debtMoratoriumMonths: number; // 0, 3, 6, 9 months principal repayment holiday
+  cgtmseCoveragePct: number; // 0 to 85% credit guarantee cover
+  gstRefundAccelerationDays: number; // 0 to 60 days accelerated ITC refund
+  opexRationalizationPct: number; // 0 to 25% operational overhead reduction
+  powerTariffSubsidyPct: number; // 0 to 30% industrial power & freight subsidy
+}
+
+export interface InterventionPreset {
+  id: string;
+  title: string;
+  description: string;
+  badge: string;
+  authority: string;
+  params: InterventionParams;
+}
+
+export interface InterventionSimulationResult {
+  baselineStressScore: number;
+  postInterventionScore: number;
+  stressReliefDelta: number; // negative value representing drop in stress
+  baselineRiskLevel: RiskLevel;
+  postInterventionRiskLevel: RiskLevel;
+  creditPreservedCr: number; // INR Crores prevented from NPA
+  enterprisesSavedCount: number; // estimated MSMEs saved
+  jobsProtectedCount: number; // estimated jobs preserved
+  totalInterventionCostCr: number; // fiscal cost to exchequer
+  roiRatio: number; // economic benefit multiplier (credit / cost)
+  liquidityInjectedCr: number; // working capital liquidity released
+  sectorRelief: {
+    sector: string;
+    beforeScore: number;
+    afterScore: number;
+    reliefPoints: number;
+    riskStatus: RiskLevel;
+  }[];
+  stateRelief: {
+    state: string;
+    beforeScore: number;
+    afterScore: number;
+    reliefPoints: number;
+    riskStatus: RiskLevel;
+  }[];
+  policyBriefSummary: string;
+  actionRoadmap: {
+    phase: string;
+    timeframe: string;
+    title: string;
+    description: string;
+    leadAgency: string;
+  }[];
+}
+

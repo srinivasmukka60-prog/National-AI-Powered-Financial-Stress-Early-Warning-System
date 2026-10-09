@@ -5,161 +5,314 @@
 
 import React, { useState } from 'react';
 import { UserRole, StateData } from './types';
-import { Header } from './components/Header';
-import { PrivacyBanner } from './components/PrivacyBanner';
-import { LandingHeroView } from './components/LandingHeroView';
+import { AgencySidebar } from './components/AgencySidebar';
+import { AgencyHeader } from './components/AgencyHeader';
+import { AgencyDashboardView } from './components/AgencyDashboardView';
+import { SettingsModal } from './components/SettingsModal';
+import { UserProfileModal } from './components/UserProfileModal';
 import { DashboardView } from './components/DashboardView';
 import { IndiaMap } from './components/IndiaMap';
+import { RiskHeatmapView } from './components/RiskHeatmapView';
 import { SectorAnalysisView } from './components/SectorAnalysisView';
 import { ForecastEngineView } from './components/ForecastEngineView';
 import { SMEAnalyzerView } from './components/SMEAnalyzerView';
+import { AIDigitalCFOView } from './components/AIDigitalCFOView';
+import { CashflowForecastView } from './components/CashflowForecastView';
 import { CrisisSimulatorView } from './components/CrisisSimulatorView';
+import { InterventionSimulatorView } from './components/InterventionSimulatorView';
 import { EarlyWarningsView } from './components/EarlyWarningsView';
 import { AIInsightsView } from './components/AIInsightsView';
 import { MethodologyView } from './components/MethodologyView';
-import { PresentationTourModal } from './components/PresentationTourModal';
+import { MainAIChatbot } from './components/MainAIChatbot';
+import { InstallShortcutModal } from './components/InstallShortcutModal';
+import { AuthModal } from './components/AuthModal';
+import { SessionLockOverlay } from './components/SessionLockOverlay';
+import { SecurityCenterModal } from './components/SecurityCenterModal';
+import { LogOut, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from './context/LanguageContext';
+import { useAuth } from './context/AuthContext';
+import { getTranslation } from './utils/translations';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<string>('landing');
+  const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [userRole, setUserRole] = useState<UserRole>('government');
   const [darkMode, setDarkMode] = useState<boolean>(true);
-  const [tourOpen, setTourOpen] = useState<boolean>(false);
   const [selectedBriefingStateId, setSelectedBriefingStateId] = useState<string>('GJ');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [currency, setCurrency] = useState<string>('USD');
+  const { language, setLanguage, t } = useLanguage();
+  const { isAuthenticated, isLocked, lockSession, logout } = useAuth();
+
+  // Modals
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const [profileOpen, setProfileOpen] = useState<boolean>(false);
+  const [shortcutModalOpen, setShortcutModalOpen] = useState<boolean>(false);
+  const [securityCenterOpen, setSecurityCenterOpen] = useState<boolean>(false);
+  const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
+  const [logoutNotice, setLogoutNotice] = useState<string | null>(null);
+
+  // Economic Shock Simulation Preset selected from search
+  const [selectedShockPresetId, setSelectedShockPresetId] = useState<string | null>(null);
+  const [presetTimestamp, setPresetTimestamp] = useState<number>(0);
 
   const handleGenerateBriefingFromMap = (state: StateData) => {
     setSelectedBriefingStateId(state.id);
     setCurrentTab('insights');
   };
 
-  return (
-    <div className={`min-h-screen flex flex-col transition-colors ${
-      darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
-    }`}>
-      {/* Privacy and Demo Notice Banner */}
-      <PrivacyBanner darkMode={darkMode} />
+  const handleLogout = () => {
+    logout();
+    setLogoutNotice('Terminal Session securely terminated. Clearance reset.');
+    setTimeout(() => {
+      setLogoutNotice(null);
+    }, 2500);
+  };
 
-      {/* Top Bar Contract Navigation */}
-      <Header
+  // Human readable translated title for top bar
+  const tabTitles: Record<string, string> = {
+    dashboard: t('dashboard'),
+    scorecards: t('scorecards'),
+    analyzer: `${t('scorecards')} & AI Risk Analyzer`,
+    clients: t('clients'),
+    profitability: t('profitability'),
+    sectors: 'Sector Profitability',
+    cash: 'Cash-Flow Forecasting Engine',
+    cashflow: 'Cash-Flow Forecasting Engine',
+    cfo: 'AI Digital CFO Advisory',
+    growth: t('growth'),
+    forecast: 'Growth & Forecast Engine',
+    map: t('real_world_map'),
+    alerts: t('early_warnings'),
+    simulator: 'Crisis Simulator',
+    intervention: 'Intervention Simulator',
+    heatmap: 'Risk Heatmap',
+    insights: 'Executive AI Briefings',
+    methodology: 'Methodology & Architecture',
+  };
+
+  const activeTitle = tabTitles[currentTab] || t('dashboard');
+
+  return (
+    <div
+      className={`min-h-screen flex flex-row transition-colors ${
+        darkMode ? 'bg-[#0f141c] text-slate-200' : 'bg-slate-100/70 text-slate-900'
+      }`}
+    >
+      {/* 1. Left Sidebar Navigation (Matching User Screenshot) */}
+      <AgencySidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        userRole={userRole}
-        setUserRole={setUserRole}
         darkMode={darkMode}
-        setDarkMode={setDarkMode}
-        onOpenTour={() => setTourOpen(true)}
+        language={language}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onLogout={handleLogout}
+        onOpenShortcutModal={() => setShortcutModalOpen(true)}
+        onOpenProfile={() => setProfileOpen(true)}
+        onOpenSecurityCenter={() => setSecurityCenterOpen(true)}
       />
 
-      {/* Main Content Viewport */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6">
-        {currentTab === 'landing' && (
-          <LandingHeroView
-            darkMode={darkMode}
-            onNavigate={(tab) => setCurrentTab(tab)}
-            onOpenTour={() => setTourOpen(true)}
-          />
-        )}
+      {/* 2. Main Content Viewport */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Top Header Bar */}
+        <AgencyHeader
+          title={activeTitle}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          language={language}
+          setLanguage={setLanguage}
+          onOpenProfile={() => setProfileOpen(true)}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onOpenShortcutModal={() => setShortcutModalOpen(true)}
+          onOpenSecurityCenter={() => setSecurityCenterOpen(true)}
+          onLockSession={lockSession}
+          onLogout={handleLogout}
+          onNavigate={(tab) => setCurrentTab(tab)}
+          onSelectState={(stateId) => {
+            setSelectedBriefingStateId(stateId);
+            setCurrentTab('insights');
+          }}
+          onSelectShockPreset={(presetId) => {
+            setSelectedShockPresetId(presetId);
+            setPresetTimestamp(Date.now());
+            setCurrentTab('simulator');
+          }}
+        />
 
-        {currentTab === 'dashboard' && (
-          <DashboardView
-            darkMode={darkMode}
-            userRole={userRole}
-            onNavigate={(tab) => setCurrentTab(tab)}
-          />
-        )}
-
-        {currentTab === 'map' && (
-          <IndiaMap
-            darkMode={darkMode}
-            onGenerateBriefing={handleGenerateBriefingFromMap}
-          />
-        )}
-
-        {currentTab === 'sectors' && (
-          <SectorAnalysisView
-            darkMode={darkMode}
-            onNavigateToSimulator={() => setCurrentTab('simulator')}
-          />
-        )}
-
-        {currentTab === 'forecast' && (
-          <ForecastEngineView darkMode={darkMode} />
-        )}
-
-        {currentTab === 'analyzer' && (
-          <SMEAnalyzerView darkMode={darkMode} />
-        )}
-
-        {currentTab === 'simulator' && (
-          <CrisisSimulatorView darkMode={darkMode} />
-        )}
-
-        {currentTab === 'alerts' && (
-          <EarlyWarningsView darkMode={darkMode} />
-        )}
-
-        {currentTab === 'insights' && (
-          <AIInsightsView
-            darkMode={darkMode}
-            initialStateId={selectedBriefingStateId}
-          />
-        )}
-
-        {currentTab === 'methodology' && (
-          <MethodologyView darkMode={darkMode} />
-        )}
-      </main>
-
-      {/* Professional Footer */}
-      <footer className={`border-t py-8 px-4 md:px-8 text-xs transition-colors ${
-        darkMode ? 'bg-slate-950 border-slate-900 text-slate-500' : 'bg-white border-slate-200 text-slate-500'
-      }`}>
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded bg-amber-500 flex items-center justify-center text-[10px] font-bold text-slate-950">
-              SS
+        {/* Scrollable View Container */}
+        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-5">
+          {logoutNotice && (
+            <div className="mb-4 p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4" />
+              {logoutNotice}
             </div>
-            <span className="font-bold text-slate-300">
-              SME-SENTINEL
-            </span>
-            <span>·</span>
-            <span>National SME Financial Stress Predictor</span>
-          </div>
+          )}
 
-          <div className="flex flex-wrap items-center gap-4 text-xs">
-            <button
-              onClick={() => setCurrentTab('methodology')}
-              className="hover:text-amber-400 transition-colors cursor-pointer"
-            >
-              Methodology & Privacy
-            </button>
-            <span>·</span>
-            <button
-              onClick={() => setCurrentTab('analyzer')}
-              className="hover:text-amber-400 transition-colors cursor-pointer"
-            >
-              Confidential SME Sandbox
-            </button>
-            <span>·</span>
-            <button
-              onClick={() => setTourOpen(true)}
-              className="text-amber-500 hover:text-amber-400 font-semibold cursor-pointer"
-            >
-              Hackathon Demo Tour
-            </button>
-          </div>
+          {/* Core Dashboard View Matching Screenshot Pixel-for-Pixel */}
+          {currentTab === 'dashboard' && (
+            <AgencyDashboardView
+              darkMode={darkMode}
+              currency={currency}
+              language={language}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
 
-          <div className="text-[11px] text-slate-400">
-            Demo/Synthetic Data — For Hackathon Demonstration · Decision Support Only
-          </div>
-        </div>
-      </footer>
+          {/* Scorecards View */}
+          {(currentTab === 'scorecards' || currentTab === 'analyzer') && (
+            <SMEAnalyzerView
+              darkMode={darkMode}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
 
-      {/* Guided Hackathon Presentation Tour Modal */}
-      <PresentationTourModal
-        isOpen={tourOpen}
-        onClose={() => setTourOpen(false)}
-        onNavigateTab={(tab) => setCurrentTab(tab)}
+          {/* Clients & National SME Directory */}
+          {currentTab === 'clients' && (
+            <DashboardView
+              darkMode={darkMode}
+              userRole={userRole}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
+
+          {/* Profitability Analysis */}
+          {(currentTab === 'profitability' || currentTab === 'sectors') && (
+            <SectorAnalysisView
+              darkMode={darkMode}
+              onNavigateToSimulator={() => setCurrentTab('simulator')}
+            />
+          )}
+
+          {/* Corporate Cash-Flow Forecasting Engine */}
+          {(currentTab === 'cash' || currentTab === 'cashflow') && (
+            <CashflowForecastView
+              darkMode={darkMode}
+              currency={currency}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
+
+          {/* AI Digital CFO Advisory */}
+          {currentTab === 'cfo' && (
+            <AIDigitalCFOView
+              darkMode={darkMode}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
+
+          {/* Growth & Forecast Engine */}
+          {(currentTab === 'growth' || currentTab === 'forecast') && (
+            <ForecastEngineView darkMode={darkMode} />
+          )}
+
+          {/* Real-World Satellite Map */}
+          {currentTab === 'map' && (
+            <IndiaMap
+              darkMode={darkMode}
+              onGenerateBriefing={handleGenerateBriefingFromMap}
+            />
+          )}
+
+          {/* Risk Heatmap */}
+          {currentTab === 'heatmap' && (
+            <RiskHeatmapView
+              darkMode={darkMode}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
+
+          {/* Crisis Simulator */}
+          {currentTab === 'simulator' && (
+            <CrisisSimulatorView
+              darkMode={darkMode}
+              onNavigate={(tab) => setCurrentTab(tab)}
+              initialPresetId={selectedShockPresetId}
+              presetTimestamp={presetTimestamp}
+            />
+          )}
+
+          {/* Intervention Simulator */}
+          {currentTab === 'intervention' && (
+            <InterventionSimulatorView
+              darkMode={darkMode}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
+
+          {/* Early Warning Feed */}
+          {currentTab === 'alerts' && (
+            <EarlyWarningsView
+              darkMode={darkMode}
+              searchQuery={searchQuery}
+              onNavigate={(tab) => setCurrentTab(tab)}
+            />
+          )}
+
+          {/* Executive AI Insights */}
+          {currentTab === 'insights' && (
+            <AIInsightsView
+              darkMode={darkMode}
+              initialStateId={selectedBriefingStateId}
+            />
+          )}
+
+          {/* Methodology View */}
+          {currentTab === 'methodology' && (
+            <MethodologyView darkMode={darkMode} />
+          )}
+        </main>
+      </div>
+
+      {/* 3. Global Interactive Modals */}
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
         darkMode={darkMode}
+        currency={currency}
+        setCurrency={setCurrency}
+        language={language}
+        setLanguage={setLanguage}
+        onOpenSecurityCenter={() => setSecurityCenterOpen(true)}
+      />
+
+      <UserProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        darkMode={darkMode}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onLogout={handleLogout}
+        onOpenSecurityCenter={() => setSecurityCenterOpen(true)}
+        onLockSession={lockSession}
+      />
+
+      <InstallShortcutModal
+        isOpen={shortcutModalOpen}
+        onClose={() => setShortcutModalOpen(false)}
+        darkMode={darkMode}
+      />
+
+      {/* Security Modals & Lock Screen */}
+      <AuthModal
+        isOpen={!isAuthenticated || authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        canDismiss={isAuthenticated}
+        darkMode={darkMode}
+      />
+
+      {isLocked && <SessionLockOverlay />}
+
+      <SecurityCenterModal
+        isOpen={securityCenterOpen}
+        onClose={() => setSecurityCenterOpen(false)}
+        darkMode={darkMode}
+      />
+
+      {/* 4. Persistent Global AI Copilot Floating Chatbot */}
+      <MainAIChatbot
+        darkMode={darkMode}
+        currentTab={currentTab}
+        onNavigate={(tab) => setCurrentTab(tab)}
       />
     </div>
   );
