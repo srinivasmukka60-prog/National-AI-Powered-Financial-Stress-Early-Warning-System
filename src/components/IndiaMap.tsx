@@ -48,7 +48,7 @@ interface IndiaMapProps {
 
 type TileStyle = 'satellite' | 'streets' | 'topo' | 'dark';
 
-const TILE_CONFIG: Record<TileStyle, { url: string; referenceUrl?: string; attribution: string; label: string; icon: string }> = {
+const TILE_CONFIG: Record<TileStyle, { url: string; referenceUrl?: string; subdomains?: string; attribution: string; label: string; icon: string }> = {
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     referenceUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
@@ -57,8 +57,9 @@ const TILE_CONFIG: Record<TileStyle, { url: string; referenceUrl?: string; attri
     icon: '🛰️',
   },
   streets: {
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    subdomains: 'abcd',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     label: 'Street Atlas',
     icon: '🗺️',
   },
@@ -69,9 +70,9 @@ const TILE_CONFIG: Record<TileStyle, { url: string; referenceUrl?: string; attri
     icon: '🏔️',
   },
   dark: {
-    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-    referenceUrl: 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Tiles &copy; Esri, DeLorme, NAVTEQ',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    subdomains: 'abcd',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     label: 'Dark Tactical',
     icon: '🌃',
   },
@@ -181,6 +182,7 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({ darkMode, onGenerateBriefing
     const tileCfg = TILE_CONFIG[tileStyle];
     const initialTileLayer = L.tileLayer(tileCfg.url, {
       maxZoom: 19,
+      subdomains: tileCfg.subdomains || 'abc',
     }).addTo(map);
     tileLayerRef.current = initialTileLayer;
 
@@ -188,6 +190,7 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({ darkMode, onGenerateBriefing
       const initialRefLayer = L.tileLayer(tileCfg.referenceUrl, {
         maxZoom: 19,
         pane: 'overlayPane',
+        subdomains: tileCfg.subdomains || 'abc',
       }).addTo(map);
       tileReferenceLayerRef.current = initialRefLayer;
     }
@@ -231,6 +234,7 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({ darkMode, onGenerateBriefing
     const tileCfg = TILE_CONFIG[tileStyle];
     const newTileLayer = L.tileLayer(tileCfg.url, {
       maxZoom: 19,
+      subdomains: tileCfg.subdomains || 'abc',
     }).addTo(map);
     tileLayerRef.current = newTileLayer;
 
@@ -238,6 +242,7 @@ export const IndiaMap: React.FC<IndiaMapProps> = ({ darkMode, onGenerateBriefing
       const newRefLayer = L.tileLayer(tileCfg.referenceUrl, {
         maxZoom: 19,
         pane: 'overlayPane',
+        subdomains: tileCfg.subdomains || 'abc',
       }).addTo(map);
       tileReferenceLayerRef.current = newRefLayer;
     }

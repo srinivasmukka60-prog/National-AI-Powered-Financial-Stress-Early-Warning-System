@@ -20,6 +20,7 @@ import {
   Smartphone,
   Phone,
   MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 import {
   SupportedLanguage,

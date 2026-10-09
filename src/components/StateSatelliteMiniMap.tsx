@@ -45,7 +45,7 @@ const SATELLITE_TILES: Record<SatelliteImageryMode, { url: string; maxZoom: numb
     icon: '🛰️',
   },
   night_lights: {
-    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     maxZoom: 18,
     label: 'Night Activity',
     icon: '🌃',
