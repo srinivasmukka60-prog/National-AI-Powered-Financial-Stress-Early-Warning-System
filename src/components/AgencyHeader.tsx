@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Lock,
   LogOut,
+  Menu,
 } from 'lucide-react';
 import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../utils/translations';
 import { useUserProfile } from '../context/UserProfileContext';
@@ -41,6 +42,7 @@ interface AgencyHeaderProps {
   onNavigate?: (tab: string) => void;
   onSelectState?: (stateId: string) => void;
   onSelectShockPreset?: (presetId: string) => void;
+  onOpenMobileMenu?: () => void;
 }
 
 export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
@@ -60,6 +62,7 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
   onNavigate,
   onSelectState,
   onSelectShockPreset,
+  onOpenMobileMenu,
 }) => {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -94,9 +97,22 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
           : 'bg-white border-slate-200 text-slate-900'
       }`}
     >
-      {/* Left: Title & Search Bar */}
-      <div className="flex items-center gap-4 sm:gap-6 flex-1 max-w-2xl">
-        <h1 className={`text-xl md:text-2xl font-bold tracking-tight shrink-0 capitalize ${searchPaletteOpen ? 'hidden md:block' : 'block'}`}>
+      {/* Left: Hamburger (mobile), Title & Search Bar */}
+      <div className="flex items-center gap-2.5 sm:gap-4 md:gap-6 flex-1 min-w-0 max-w-2xl">
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className={`lg:hidden p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ${
+              darkMode ? 'bg-[#141923] border-slate-800 text-slate-300 hover:bg-slate-800' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+            }`}
+            title="Open Navigation Menu"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        )}
+
+        <h1 className={`text-base sm:text-lg md:text-2xl font-bold tracking-tight truncate capitalize max-w-[130px] xs:max-w-[180px] sm:max-w-xs md:max-w-none ${searchPaletteOpen ? 'hidden md:block' : 'block'}`}>
           {title}
         </h1>
 

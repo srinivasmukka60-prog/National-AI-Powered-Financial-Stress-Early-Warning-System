@@ -21,21 +21,21 @@ export const ScorecardReportModal: React.FC<ScorecardReportModalProps> = ({
           darkMode ? 'bg-[#0f1319] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}
       >
-        <div className={`p-6 border-b flex items-center justify-between ${
+        <div className={`p-4 sm:p-6 border-b flex items-center justify-between ${
           darkMode ? 'border-slate-800 bg-[#121721]' : 'border-slate-100 bg-slate-50'
         }`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
               <FileText className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold tracking-tight">March 2026 Scorecard Audit</h2>
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base sm:text-xl font-bold tracking-tight">March 2026 Scorecard Audit</h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   Score: 65 / 100 · Positive
                 </span>
               </div>
-              <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              <p className={`text-xs truncate ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                 Full financial audit, liquidity health verification, and margin analysis.
               </p>
             </div>

@@ -28,7 +28,15 @@ import { InstallShortcutModal } from './components/InstallShortcutModal';
 import { AuthModal } from './components/AuthModal';
 import { SessionLockOverlay } from './components/SessionLockOverlay';
 import { SecurityCenterModal } from './components/SecurityCenterModal';
-import { LogOut, CheckCircle2 } from 'lucide-react';
+import {
+  LogOut,
+  CheckCircle2,
+  Menu,
+  LayoutGrid,
+  Wallet,
+  Bot,
+  FileText,
+} from 'lucide-react';
 import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
 import { getTranslation } from './utils/translations';
@@ -50,6 +58,7 @@ export default function App() {
   const [securityCenterOpen, setSecurityCenterOpen] = useState<boolean>(false);
   const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
   const [logoutNotice, setLogoutNotice] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Economic Shock Simulation Preset selected from search
   const [selectedShockPresetId, setSelectedShockPresetId] = useState<string | null>(null);
@@ -109,10 +118,12 @@ export default function App() {
         onOpenShortcutModal={() => setShortcutModalOpen(true)}
         onOpenProfile={() => setProfileOpen(true)}
         onOpenSecurityCenter={() => setSecurityCenterOpen(true)}
+        mobileMenuOpen={mobileMenuOpen}
+        onCloseMobileMenu={() => setMobileMenuOpen(false)}
       />
 
       {/* 2. Main Content Viewport */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         {/* Top Header Bar */}
         <AgencyHeader
           title={activeTitle}
@@ -138,10 +149,11 @@ export default function App() {
             setPresetTimestamp(Date.now());
             setCurrentTab('simulator');
           }}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
         />
 
         {/* Scrollable View Container */}
-        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-5">
+        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-3.5 sm:py-5 pb-20 lg:pb-6">
           {logoutNotice && (
             <div className="mb-4 p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
               <CheckCircle2 className="w-4 h-4" />
@@ -262,6 +274,74 @@ export default function App() {
             <MethodologyView darkMode={darkMode} />
           )}
         </main>
+
+        {/* Sleek Mobile Bottom Navigation Bar (< lg screens) */}
+        <nav
+          className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-md px-2 py-1 flex items-center justify-around transition-colors shadow-lg ${
+            darkMode ? 'bg-[#10151f]/95 border-slate-800/90 text-slate-400' : 'bg-white/95 border-slate-200/90 text-slate-600'
+          }`}
+        >
+          <button
+            type="button"
+            onClick={() => setCurrentTab('dashboard')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all cursor-pointer ${
+              currentTab === 'dashboard'
+                ? darkMode ? 'text-sky-400 font-bold bg-sky-950/40' : 'text-sky-600 font-bold bg-sky-50'
+                : 'hover:text-slate-200'
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentTab('cash')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all cursor-pointer ${
+              currentTab === 'cash' || currentTab === 'cashflow'
+                ? darkMode ? 'text-sky-400 font-bold bg-sky-950/40' : 'text-sky-600 font-bold bg-sky-50'
+                : 'hover:text-slate-200'
+            }`}
+          >
+            <Wallet className="w-4 h-4" />
+            <span>Cashflow</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentTab('cfo')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all cursor-pointer ${
+              currentTab === 'cfo'
+                ? darkMode ? 'text-sky-400 font-bold bg-sky-950/40' : 'text-sky-600 font-bold bg-sky-50'
+                : 'hover:text-slate-200'
+            }`}
+          >
+            <Bot className="w-4 h-4" />
+            <span>AI CFO</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentTab('scorecards')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all cursor-pointer ${
+              currentTab === 'scorecards' || currentTab === 'analyzer'
+                ? darkMode ? 'text-sky-400 font-bold bg-sky-950/40' : 'text-sky-600 font-bold bg-sky-50'
+                : 'hover:text-slate-200'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>Scorecard</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all cursor-pointer hover:text-slate-200"
+          >
+            <Menu className="w-4 h-4 text-sky-400" />
+            <span>More</span>
+          </button>
+        </nav>
       </div>
 
       {/* 3. Global Interactive Modals */}

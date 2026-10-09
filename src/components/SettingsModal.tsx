@@ -146,7 +146,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className={`flex border-b px-6 gap-2 ${darkMode ? 'border-slate-800 bg-[#0f1319]' : 'border-slate-100 bg-white'}`}>
+        <div className={`flex border-b px-4 sm:px-6 gap-2 overflow-x-auto whitespace-nowrap scrollbar-none ${darkMode ? 'border-slate-800 bg-[#0f1319]' : 'border-slate-100 bg-white'}`}>
           {[
             { id: 'general', label: t('tab_general'), icon: Globe },
             { id: 'thresholds', label: t('tab_thresholds'), icon: Sliders },
@@ -701,12 +701,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className={`p-6 border-t flex items-center justify-between ${
+        <div className={`p-4 sm:p-6 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 ${
           darkMode ? 'border-slate-800 bg-[#121721]' : 'border-slate-100 bg-slate-50'
         }`}>
           <button
             onClick={handleReset}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
               darkMode ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
             }`}
           >
@@ -716,7 +716,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer text-center ${
                 darkMode ? 'border-slate-700 text-slate-300 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
               }`}
             >
@@ -724,7 +724,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-400 text-white shadow-md shadow-sky-500/20 transition-all cursor-pointer"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-400 text-white shadow-md shadow-sky-500/20 transition-all cursor-pointer"
             >
               <Save className="w-4 h-4" />
               {t('save_settings')}

@@ -136,7 +136,7 @@ export const InstallShortcutModal: React.FC<InstallShortcutModalProps> = ({
         )}
 
         {/* Platform Selection Tabs */}
-        <div className={`flex border-b px-5 gap-2 pt-3 ${darkMode ? 'border-slate-800 bg-[#0c1017]' : 'border-slate-200 bg-slate-50'}`}>
+        <div className={`flex border-b px-4 sm:px-5 gap-2 pt-3 overflow-x-auto whitespace-nowrap scrollbar-none ${darkMode ? 'border-slate-800 bg-[#0c1017]' : 'border-slate-200 bg-slate-50'}`}>
           {[
             { id: 'mobile', label: 'Mobile Phone (iOS / Android)', icon: Smartphone, badge: 'Popular' },
             { id: 'windows', label: 'Windows Desktop (.URL)', icon: Monitor },
