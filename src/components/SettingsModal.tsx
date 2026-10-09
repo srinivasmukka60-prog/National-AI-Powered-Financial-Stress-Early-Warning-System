@@ -35,6 +35,7 @@ import {
   getInstallPrompt,
 } from '../utils/appShortcut';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -70,6 +71,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     twoFactorMethod,
     setTwoFactorMethod,
   } = useAuth();
+  const { language: ctxLanguage, setLanguage: ctxSetLanguage, t } = useLanguage();
+  const activeLang = ctxLanguage || language || 'en';
 
   const [phoneInput, setPhoneInput] = useState(phone || '+91 98490 28410');
   const [phoneSaved, setPhoneSaved] = useState(false);
@@ -92,8 +95,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   if (!isOpen) return null;
 
-  const t = (key: string) => getTranslation(language, key);
-
   const handleSave = () => {
     if (geminiApiKey.trim() && !geminiApiKey.includes('***')) {
       localStorage.setItem('gemini_api_key', geminiApiKey.trim());
@@ -105,6 +106,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleReset = () => {
     setCurrency('USD');
     if (setLanguage) setLanguage('en');
+    ctxSetLanguage('en');
     setMarginAlertThreshold(74.0);
     setRunwayAlertMonths(6.0);
     setArOverdueDays(30);
@@ -188,12 +190,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {SUPPORTED_LANGUAGES.map((langOpt) => {
-                    const isSelected = language === langOpt.code;
+                    const isSelected = activeLang === langOpt.code;
                     return (
                       <button
                         key={langOpt.code}
                         type="button"
-                        onClick={() => setLanguage && setLanguage(langOpt.code)}
+                        onClick={() => {
+                          ctxSetLanguage(langOpt.code);
+                          if (setLanguage) setLanguage(langOpt.code);
+                        }}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
                             ? 'bg-sky-500/15 border-sky-500 text-sky-400 shadow-sm shadow-sky-500/20'

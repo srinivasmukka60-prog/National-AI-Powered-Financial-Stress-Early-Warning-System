@@ -17,8 +17,9 @@ import {
   Bot,
   X,
 } from 'lucide-react';
-import { SupportedLanguage, getTranslation } from '../utils/translations';
+import { SupportedLanguage } from '../utils/translations';
 import { useUserProfile } from '../context/UserProfileContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AgencySidebarProps {
   currentTab: string;
@@ -38,7 +39,7 @@ export const AgencySidebar: React.FC<AgencySidebarProps> = ({
   currentTab,
   setCurrentTab,
   darkMode,
-  language = 'en',
+  language: _language = 'en',
   onOpenSettings,
   onLogout,
   onOpenShortcutModal,
@@ -48,7 +49,7 @@ export const AgencySidebar: React.FC<AgencySidebarProps> = ({
   onCloseMobileMenu,
 }) => {
   const { profile } = useUserProfile();
-  const t = (key: string) => getTranslation(language, key);
+  const { t } = useLanguage();
 
   const handleNav = (tabId: string) => {
     setCurrentTab(tabId);
@@ -60,8 +61,8 @@ export const AgencySidebar: React.FC<AgencySidebarProps> = ({
     { id: 'scorecards', label: t('scorecards'), icon: FileText },
     { id: 'clients', label: t('clients'), icon: Briefcase },
     { id: 'profitability', label: t('profitability'), icon: Percent },
-    { id: 'cash', label: 'Cash-Flow Forecast', icon: Wallet },
-    { id: 'cfo', label: 'AI Digital CFO', icon: Bot },
+    { id: 'cash', label: t('cash', 'Cash-Flow Forecast'), icon: Wallet },
+    { id: 'cfo', label: t('cfo_nav', 'AI Digital CFO'), icon: Bot },
     { id: 'growth', label: t('growth'), icon: TrendingUp },
   ];
 

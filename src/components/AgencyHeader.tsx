@@ -24,6 +24,7 @@ import {
 import { SupportedLanguage, SUPPORTED_LANGUAGES, getTranslation } from '../utils/translations';
 import { useUserProfile } from '../context/UserProfileContext';
 import { GlobalSearchPalette } from './GlobalSearchPalette';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AgencyHeaderProps {
   title: string;
@@ -84,10 +85,16 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
   }, []);
 
   const { profile } = useUserProfile();
+  const { language, setLanguage: ctxSetLanguage, t } = useLanguage();
 
-  const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
+  // Allow override via props (backwards compat), but prefer context
+  const activeLang = language;
+  const handleSetLanguage = (lang: SupportedLanguage) => {
+    ctxSetLanguage(lang);
+    if (setLanguage) setLanguage(lang);
+  };
 
-  const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
+  const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === activeLang) || SUPPORTED_LANGUAGES[0];
 
   return (
     <header
@@ -240,12 +247,12 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
               </div>
               <div className="space-y-0.5">
                 {SUPPORTED_LANGUAGES.map((langOpt) => {
-                  const isSelected = language === langOpt.code;
+                  const isSelected = activeLang === langOpt.code;
                   return (
                     <button
                       key={langOpt.code}
                       onClick={() => {
-                        if (setLanguage) setLanguage(langOpt.code);
+                        handleSetLanguage(langOpt.code);
                         setLangMenuOpen(false);
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left cursor-pointer ${

@@ -30,6 +30,7 @@ import {
 import { ScorecardReportModal } from './ScorecardReportModal';
 import { AlertDetailsModal } from './AlertDetailsModal';
 import { SupportedLanguage, getTranslation } from '../utils/translations';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AgencyDashboardViewProps {
   darkMode: boolean;
@@ -41,7 +42,7 @@ interface AgencyDashboardViewProps {
 export const AgencyDashboardView: React.FC<AgencyDashboardViewProps> = ({
   darkMode,
   currency = 'USD',
-  language = 'en',
+  language: _language = 'en',
   onNavigate,
 }) => {
   const [timeframe, setTimeframe] = useState<'Monthly' | 'Quarterly' | 'Yearly'>('Monthly');
@@ -61,7 +62,7 @@ export const AgencyDashboardView: React.FC<AgencyDashboardViewProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
+  const { t } = useLanguage();
   const currSymbol = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
 
   // 1. MONTHLY DATASET (12 Months rolling cashflow)
