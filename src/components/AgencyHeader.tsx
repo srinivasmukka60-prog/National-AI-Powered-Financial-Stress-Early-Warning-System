@@ -52,7 +52,7 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
   setSearchQuery,
   darkMode,
   setDarkMode,
-  language = 'en',
+  language: propLanguage = 'en',
   setLanguage,
   onOpenProfile,
   onOpenSettings,
@@ -67,6 +67,8 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
 }) => {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [langSearch, setLangSearch] = useState('');
+  const [langCategory, setLangCategory] = useState<'all' | 'Indian' | 'Global'>('all');
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [searchPaletteOpen, setSearchPaletteOpen] = useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
@@ -88,7 +90,7 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
   const { language: ctxLanguage, setLanguage: ctxSetLanguage, t } = useLanguage();
 
   // Prefer context language, allow fallback to prop
-  const activeLang = ctxLanguage || language;
+  const activeLang = ctxLanguage || propLanguage || 'en';
   const handleSetLanguage = (lang: SupportedLanguage) => {
     ctxSetLanguage(lang);
     if (setLanguage) setLanguage(lang);
@@ -238,15 +240,62 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
 
           {langMenuOpen && (
             <div
-              className={`absolute right-0 mt-2 w-48 rounded-2xl border shadow-2xl p-2 z-50 animate-in fade-in ${
+              className={`absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl border shadow-2xl p-2.5 z-50 animate-in fade-in ${
                 darkMode ? 'bg-[#12161f] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800/60 mb-1">
-                {t('switch_language', 'Language')} / భాష / भाषा
+              <div className="px-2 py-1.5 flex items-center justify-between border-b border-slate-800/60 mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  {t('switch_language', 'Language')} ({SUPPORTED_LANGUAGES.length})
+                </span>
+                <span className="text-[10px] text-sky-400 font-semibold px-1.5 py-0.5 rounded bg-sky-500/10">Whole Website</span>
               </div>
-              <div className="space-y-0.5">
-                {SUPPORTED_LANGUAGES.map((langOpt) => {
+
+              {/* Language Search Input */}
+              <div className="relative mb-2 px-1">
+                <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search language / భాష / भाषा..."
+                  value={langSearch}
+                  onChange={(e) => setLangSearch(e.target.value)}
+                  className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs font-medium border focus:outline-none focus:ring-1 focus:ring-sky-500 ${
+                    darkMode
+                      ? 'bg-[#151c28] border-slate-800 text-slate-200 placeholder-slate-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                  }`}
+                  autoFocus
+                />
+              </div>
+
+              {/* Category Filter Pills */}
+              <div className="flex gap-1 mb-2 px-1">
+                {(['all', 'Indian', 'Global'] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setLangCategory(cat)}
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer ${
+                      langCategory === cat
+                        ? darkMode ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'bg-sky-100 text-sky-700 border border-sky-300'
+                        : darkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    {cat === 'all' ? `All (${SUPPORTED_LANGUAGES.length})` : cat === 'Indian' ? 'Indian (13)' : 'Global (8)'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Scrollable Language List */}
+              <div className="max-h-64 overflow-y-auto space-y-0.5 pr-1">
+                {SUPPORTED_LANGUAGES.filter((langOpt) => {
+                  const matchesCat = langCategory === 'all' || langOpt.category === langCategory;
+                  const query = langSearch.trim().toLowerCase();
+                  const matchesQuery = !query ||
+                    langOpt.name.toLowerCase().includes(query) ||
+                    langOpt.nativeName.toLowerCase().includes(query) ||
+                    langOpt.code.toLowerCase().includes(query);
+                  return matchesCat && matchesQuery;
+                }).map((langOpt) => {
                   const isSelected = activeLang === langOpt.code;
                   return (
                     <button
@@ -254,18 +303,24 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
                       onClick={() => {
                         handleSetLanguage(langOpt.code);
                         setLangMenuOpen(false);
+                        setLangSearch('');
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left cursor-pointer ${
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors text-left cursor-pointer ${
                         isSelected
-                          ? darkMode ? 'bg-sky-500/15 text-sky-400 font-bold' : 'bg-sky-50 text-sky-600 font-bold'
+                          ? darkMode ? 'bg-sky-500/15 text-sky-400 font-bold border border-sky-500/20' : 'bg-sky-50 text-sky-600 font-bold border border-sky-200'
                           : darkMode ? 'text-slate-300 hover:bg-slate-800/80 hover:text-white' : 'text-slate-700 hover:bg-slate-100'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <span>{langOpt.flag}</span>
-                        <span>{langOpt.nativeName}</span>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-base shrink-0">{langOpt.flag}</span>
+                        <div className="truncate">
+                          <span className="font-semibold">{langOpt.nativeName}</span>
+                          <span className={`text-[10px] ml-1.5 ${isSelected ? 'text-sky-300' : 'text-slate-400'}`}>
+                            ({langOpt.name})
+                          </span>
+                        </div>
                       </div>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-sky-400" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-sky-400 shrink-0" />}
                     </button>
                   );
                 })}

@@ -13,9 +13,12 @@ import {
   Sparkles,
   LogOut,
   Lock,
+  Phone,
+  Database,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { useUserProfile, PRESET_AVATARS } from '../context/UserProfileContext';
+import { useAuth } from '../context/AuthContext';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -37,6 +40,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onLockSession,
 }) => {
   const { profile, updateProfile } = useUserProfile();
+  const { user, supabaseConfig } = useAuth();
 
   const [name, setName] = useState(profile.name);
   const [title, setTitle] = useState(profile.title);
@@ -358,8 +362,41 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <div className="text-xs font-medium truncate">{role}</div>
                 </div>
                 <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold shrink-0">
-                  Full Access
+                  {user?.securityRating || 'Tier-4 Active'}
                 </span>
+              </div>
+
+              {/* Phone and Supabase Auth Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div
+                  className={`p-3 rounded-xl border flex items-center gap-3 ${
+                    darkMode ? 'bg-[#141924] border-slate-800' : 'bg-slate-50 border-slate-100'
+                  }`}
+                >
+                  <Phone className="w-4 h-4 text-amber-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-[10px] uppercase font-bold tracking-wider ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                      2FA Phone
+                    </div>
+                    <div className="text-xs font-mono font-medium truncate">{user?.phone || '+91 98490 28410'}</div>
+                  </div>
+                </div>
+
+                <div
+                  className={`p-3 rounded-xl border flex items-center gap-3 ${
+                    darkMode ? 'bg-[#141924] border-slate-800' : 'bg-slate-50 border-slate-100'
+                  }`}
+                >
+                  <Database className="w-4 h-4 text-sky-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-[10px] uppercase font-bold tracking-wider ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Auth Provider
+                    </div>
+                    <div className="text-xs font-semibold text-sky-400 truncate">
+                      {supabaseConfig.isConfigured ? 'Supabase Cloud Auth' : 'Local Sandbox Mode'}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

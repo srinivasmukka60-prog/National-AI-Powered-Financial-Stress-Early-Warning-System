@@ -42,7 +42,7 @@ interface AgencyDashboardViewProps {
 export const AgencyDashboardView: React.FC<AgencyDashboardViewProps> = ({
   darkMode,
   currency = 'USD',
-  language: _language = 'en',
+  language: propLanguage,
   onNavigate,
 }) => {
   const [timeframe, setTimeframe] = useState<'Monthly' | 'Quarterly' | 'Yearly'>('Monthly');
@@ -62,7 +62,8 @@ export const AgencyDashboardView: React.FC<AgencyDashboardViewProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const { t } = useLanguage();
+  const { t, language: ctxLanguage } = useLanguage();
+  const language = propLanguage || ctxLanguage || 'en';
   const currSymbol = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
 
   // 1. MONTHLY DATASET (12 Months rolling cashflow)

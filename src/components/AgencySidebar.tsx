@@ -39,7 +39,7 @@ export const AgencySidebar: React.FC<AgencySidebarProps> = ({
   currentTab,
   setCurrentTab,
   darkMode,
-  language: _language = 'en',
+  language: propLanguage = 'en',
   onOpenSettings,
   onLogout,
   onOpenShortcutModal,

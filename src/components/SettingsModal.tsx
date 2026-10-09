@@ -15,12 +15,16 @@ import {
   Globe,
   Zap,
   Languages,
+  Search,
   Download,
   Monitor,
   Smartphone,
   Phone,
   MessageSquare,
   Sparkles,
+  Lock,
+  CheckCircle2,
+  Cloud,
 } from 'lucide-react';
 import {
   SupportedLanguage,
@@ -54,7 +58,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   darkMode,
   currency,
   setCurrency,
-  language = 'en',
+  language: propLanguage = 'en',
   setLanguage,
   onOpenSecurityCenter,
 }) => {
@@ -70,9 +74,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     updateUserPhone,
     twoFactorMethod,
     setTwoFactorMethod,
+    supabaseConfig,
+    saveSupabaseKeys,
+    clearSupabaseKeys,
   } = useAuth();
   const { language: ctxLanguage, setLanguage: ctxSetLanguage, t } = useLanguage();
-  const activeLang = ctxLanguage || language || 'en';
+  const activeLang = ctxLanguage || propLanguage || 'en';
+  const [langSearch, setLangSearch] = useState('');
+  const [langCategory, setLangCategory] = useState<'all' | 'Indian' | 'Global'>('all');
+
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(supabaseConfig.url || '');
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(supabaseConfig.anonKey || '');
+  const [supabaseSaved, setSupabaseSaved] = useState(false);
 
   const [phoneInput, setPhoneInput] = useState(phone || '+91 98490 28410');
   const [phoneSaved, setPhoneSaved] = useState(false);
@@ -155,7 +168,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             { id: 'thresholds', label: t('tab_thresholds'), icon: Sliders },
             { id: 'integrations', label: t('tab_integrations'), icon: Database },
             { id: 'notifications', label: t('tab_notifications'), icon: Bell },
-            { id: 'security', label: 'Security & 2FA', icon: Shield },
+            { id: 'security', label: t('Security & 2FA'), icon: Shield },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -184,12 +197,59 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="space-y-4">
               {/* Language Selection */}
               <div>
-                <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                  <Languages className="w-4 h-4 text-sky-400" />
-                  <span>{t('app_language')}</span>
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {SUPPORTED_LANGUAGES.map((langOpt) => {
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+                  <label className={`text-xs font-semibold uppercase tracking-wider flex items-center gap-2 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                    <Languages className="w-4 h-4 text-sky-400" />
+                    <span>{t('app_language')}</span>
+                    <span className="text-[10px] text-sky-400 font-normal">({SUPPORTED_LANGUAGES.length} Languages)</span>
+                  </label>
+
+                  {/* Category Filter Tabs */}
+                  <div className="flex gap-1">
+                    {(['all', 'Indian', 'Global'] as const).map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setLangCategory(cat)}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer ${
+                          langCategory === cat
+                            ? darkMode ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'bg-sky-100 text-sky-700 border border-sky-300'
+                            : darkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        {cat === 'all' ? `All (${SUPPORTED_LANGUAGES.length})` : cat === 'Indian' ? 'Indian (13)' : 'Global (8)'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Search Input */}
+                <div className="relative mb-2.5">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search language name or script (e.g. Tamil, हिन्दी, Spanish)..."
+                    value={langSearch}
+                    onChange={(e) => setLangSearch(e.target.value)}
+                    className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs font-medium border focus:outline-none focus:ring-1 focus:ring-sky-500 ${
+                      darkMode
+                        ? 'bg-[#151c28] border-slate-800 text-slate-200 placeholder-slate-500'
+                        : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                    }`}
+                  />
+                </div>
+
+                {/* Responsive Scrollable Language Cards Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-72 overflow-y-auto pr-1">
+                  {SUPPORTED_LANGUAGES.filter((langOpt) => {
+                    const matchesCat = langCategory === 'all' || langOpt.category === langCategory;
+                    const query = langSearch.trim().toLowerCase();
+                    const matchesQuery = !query ||
+                      langOpt.name.toLowerCase().includes(query) ||
+                      langOpt.nativeName.toLowerCase().includes(query) ||
+                      langOpt.code.toLowerCase().includes(query);
+                    return matchesCat && matchesQuery;
+                  }).map((langOpt) => {
                     const isSelected = activeLang === langOpt.code;
                     return (
                       <button
@@ -212,8 +272,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           {isSelected && <Check className="w-3.5 h-3.5 text-sky-400" />}
                         </div>
                         <div className="mt-2">
-                          <div className="text-xs font-bold">{langOpt.nativeName}</div>
-                          <div className={`text-[10px] ${isSelected ? 'text-sky-300' : 'text-slate-500'}`}>
+                          <div className="text-xs font-bold truncate">{langOpt.nativeName}</div>
+                          <div className={`text-[10px] truncate ${isSelected ? 'text-sky-300' : 'text-slate-500'}`}>
                             {langOpt.name}
                           </div>
                         </div>
@@ -302,7 +362,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </span>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">
-                    Mobile, Desktop & PWA
+                    {t('Mobile, Desktop & PWA')}
                   </span>
                 </div>
                 <p className={`text-xs mb-3 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -356,7 +416,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Gross Margin Slippage Alert Threshold
+                    {t('Gross Margin Slippage Alert Threshold')}
                   </label>
                   <span className="text-sm font-bold font-mono text-sky-400">{marginAlertThreshold}%</span>
                 </div>
@@ -370,16 +430,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="w-full accent-sky-500 cursor-pointer"
                 />
                 <span className={`text-[11px] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Triggers an automated alert if gross margin drops below this value.
+                  {t('Triggers an automated alert if gross margin drops below this value.')}
                 </span>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Minimum Cash Runway Warning
+                    {t('Minimum Cash Runway Warning')}
                   </label>
-                  <span className="text-sm font-bold font-mono text-amber-400">{runwayAlertMonths} Months</span>
+                  <span className="text-sm font-bold font-mono text-amber-400">{runwayAlertMonths} {t('Months')}</span>
                 </div>
                 <input
                   type="range"
@@ -391,16 +451,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="w-full accent-amber-500 cursor-pointer"
                 />
                 <span className={`text-[11px] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Flags working capital vulnerability if cash burn exceeds this horizon.
+                  {t('Flags working capital vulnerability if cash burn exceeds this horizon.')}
                 </span>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Accounts Receivable (AR) Overdue Trigger
+                    {t('Accounts Receivable (AR) Overdue Trigger')}
                   </label>
-                  <span className="text-sm font-bold font-mono text-rose-400">{arOverdueDays} Days</span>
+                  <span className="text-sm font-bold font-mono text-rose-400">{arOverdueDays} {t('Days')}</span>
                 </div>
                 <input
                   type="range"
@@ -412,7 +472,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="w-full accent-rose-500 cursor-pointer"
                 />
                 <span className={`text-[11px] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Categorizes receivables beyond this duration under the "Overdue" pill badge.
+                  {t('Categorizes receivables beyond this duration under the "Overdue" pill badge.')}
                 </span>
               </div>
             </div>
@@ -422,7 +482,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="space-y-4">
               <div>
                 <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Connected Accounting Engine
+                  {t('Connected Accounting Engine')}
                 </label>
                 <select
                   value={accountingPlatform}
@@ -440,7 +500,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
               <div>
                 <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Gemini AI Copilot & CFO API Key
+                  {t('Gemini AI Copilot & CFO API Key')}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -463,12 +523,113 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     }}
                     className="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
                   >
-                    Save & Test
+                    {t('Save & Test', 'Save & Test')}
                   </button>
                 </div>
                 <span className={`text-[11px] mt-1 block ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Used for real-time narrative summaries, AI Digital CFO dynamic reasoning, and anomaly discovery.
+                  {t('Used for real-time narrative summaries, AI Digital CFO dynamic reasoning, and anomaly discovery.')}
                 </span>
+              </div>
+
+              {/* Supabase Cloud Authentication Configuration */}
+              <div className={`p-4 rounded-xl border ${darkMode ? 'bg-[#0f172a]/70 border-emerald-500/30' : 'bg-emerald-50/50 border-emerald-200'}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <Cloud className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        {t('Supabase Cloud Authentication', 'Supabase Cloud Authentication')}
+                        {supabaseConfig.isConfigured ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            {t('Active Connected', 'Active Connected')}
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                            {t('Local Fallback Active', 'Local Fallback Active')}
+                          </span>
+                        )}
+                      </h4>
+                      <p className={`text-[11px] ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {t('Provides production JWT authentication, live sessions, and user management across the portal.')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  <div>
+                    <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {t('Supabase Project URL')}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="https://xyzcompany.supabase.co"
+                      value={supabaseUrlInput}
+                      onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                        darkMode ? 'bg-[#151a24] border-slate-700 text-white placeholder-slate-600' : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {t('Supabase Anon Public API Key')}
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={supabaseKeyInput}
+                      onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                        darkMode ? 'bg-[#151a24] border-slate-700 text-white placeholder-slate-600' : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                      }`}
+                    />
+                  </div>
+
+                  {supabaseSaved && (
+                    <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold py-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>{t('Supabase keys saved! Live authentication protocol active.', 'Supabase keys saved! Live authentication protocol active.')}</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        if (!supabaseUrlInput.trim() || !supabaseKeyInput.trim()) {
+                          alert('Please enter both Supabase Project URL and Anon API Key.');
+                          return;
+                        }
+                        saveSupabaseKeys(supabaseUrlInput.trim(), supabaseKeyInput.trim());
+                        setSupabaseSaved(true);
+                        setTimeout(() => setSupabaseSaved(false), 3000);
+                      }}
+                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>{t('Save Supabase Credentials', 'Save Supabase Credentials')}</span>
+                    </button>
+
+                    {supabaseConfig.isConfigured && (
+                      <button
+                        onClick={() => {
+                          clearSupabaseKeys();
+                          setSupabaseUrlInput('');
+                          setSupabaseKeyInput('');
+                          alert('Supabase credentials removed from local storage.');
+                        }}
+                        className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                          darkMode ? 'border-rose-500/40 text-rose-300 hover:bg-rose-500/20' : 'border-rose-200 text-rose-700 hover:bg-rose-50'
+                        }`}
+                      >
+                        {t('Clear Keys', 'Clear Keys')}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -479,9 +640,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 darkMode ? 'bg-[#141923] border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div>
-                  <h4 className="text-sm font-bold">Email Anomaly Alerts</h4>
+                  <h4 className="text-sm font-bold">{t('Email Anomaly Alerts')}</h4>
                   <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Send real-time alerts when margin slips below {marginAlertThreshold}%.
+                    {t('Send real-time alerts when margin slips below')} {marginAlertThreshold}%.
                   </p>
                 </div>
                 <input
@@ -496,9 +657,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 darkMode ? 'bg-[#141923] border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div>
-                  <h4 className="text-sm font-bold">Slack Webhook Notifications</h4>
+                  <h4 className="text-sm font-bold">{t('Slack Webhook Notifications')}</h4>
                   <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Broadcast monthly scorecards and runway alerts to your team channel.
+                    {t('Broadcast monthly scorecards and runway alerts to your team channel.')}
                   </p>
                 </div>
                 <input
@@ -513,9 +674,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 darkMode ? 'bg-[#141923] border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div>
-                  <h4 className="text-sm font-bold">Weekly Performance Digest</h4>
+                  <h4 className="text-sm font-bold">{t('Weekly Performance Digest')}</h4>
                   <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Receive a consolidated executive digest every Monday at 08:00 AM.
+                    {t('Receive a consolidated executive digest every Monday at 08:00 AM.')}
                   </p>
                 </div>
                 <input
@@ -535,15 +696,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               }`}>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-sm font-bold">Two-Factor Authentication (2FA)</h4>
+                    <h4 className="text-sm font-bold">{t('Two-Factor Authentication (2FA)')}</h4>
                     <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
                       is2FAEnabled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
                     }`}>
-                      {is2FAEnabled ? 'ACTIVE' : 'OFF'}
+                      {is2FAEnabled ? t('ACTIVE') : t('OFF')}
                     </span>
                   </div>
                   <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Mandate 6-digit TOTP / SMS verification on each terminal login (Demo OTP: 123456).
+                    {t('Mandate 6-digit TOTP / SMS verification on each terminal login (Demo OTP: 123456).')}
                   </p>
                 </div>
                 <button
@@ -555,7 +716,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       : 'bg-emerald-500 text-white hover:bg-emerald-600'
                   }`}
                 >
-                  {is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+                  {is2FAEnabled ? t('Disable 2FA') : t('Enable 2FA')}
                 </button>
               </div>
 
@@ -569,14 +730,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <Phone className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold">Registered Mobile for 2FA Verification</h4>
+                      <h4 className="text-sm font-bold">{t('Registered Mobile for 2FA Verification')}</h4>
                       <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                        SMS and WhatsApp OTP security codes will be transmitted to this verified mobile number.
+                        {t('SMS and WhatsApp OTP security codes will be transmitted to this verified mobile number.')}
                       </p>
                     </div>
                   </div>
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                    2FA Verified
+                    {t('2FA Verified')}
                   </span>
                 </div>
 
@@ -605,7 +766,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
                   >
                     <Check className="w-3.5 h-3.5" />
-                    <span>Save Mobile</span>
+                    <span>{t('Save Mobile')}</span>
                   </button>
                 </div>
 
@@ -618,7 +779,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* Preferred Method Selection */}
                 <div className="pt-1 flex items-center gap-3 text-xs flex-wrap">
-                  <span className={darkMode ? 'text-slate-400' : 'text-slate-600'}>Default Channel:</span>
+                  <span className={darkMode ? 'text-slate-400' : 'text-slate-600'}>{t('Default Channel:')}</span>
                   <div className="flex items-center gap-3">
                     <label className="flex items-center gap-1.5 cursor-pointer">
                       <input
@@ -628,7 +789,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         onChange={() => setTwoFactorMethod('both')}
                         className="accent-emerald-500"
                       />
-                      <span className={darkMode ? 'text-slate-300' : 'text-slate-700'}>📱 Mobile SMS & WhatsApp</span>
+                      <span className={darkMode ? 'text-slate-300' : 'text-slate-700'}>📱 {t('Mobile SMS & WhatsApp')}</span>
                     </label>
                     <label className="flex items-center gap-1.5 cursor-pointer">
                       <input
@@ -638,7 +799,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         onChange={() => setTwoFactorMethod('totp')}
                         className="accent-emerald-500"
                       />
-                      <span className={darkMode ? 'text-slate-300' : 'text-slate-700'}>🔐 Authenticator App Only</span>
+                      <span className={darkMode ? 'text-slate-300' : 'text-slate-700'}>🔐 {t('Authenticator App Only')}</span>
                     </label>
                   </div>
                 </div>
@@ -648,9 +809,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 darkMode ? 'bg-[#141923] border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div>
-                  <h4 className="text-sm font-bold">Inactivity Auto-Lock</h4>
+                  <h4 className="text-sm font-bold">{t('Inactivity Auto-Lock')}</h4>
                   <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Automatically lock the screen after idle timeout. (Default Terminal PIN: {pinCode})
+                    {t('Automatically lock the screen after idle timeout.')} ({t('Default Terminal PIN')}: {pinCode})
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -667,7 +828,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                       }`}
                     >
-                      {mins === 0 ? 'Never' : `${mins}m`}
+                      {mins === 0 ? t('Never') : `${mins}m`}
                     </button>
                   ))}
                 </div>
@@ -677,9 +838,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 darkMode ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200'
               }`}>
                 <div>
-                  <h4 className="text-sm font-bold text-emerald-400">Security & Trust Center Hub</h4>
+                  <h4 className="text-sm font-bold text-emerald-400">{t('Security & Trust Center Hub')}</h4>
                   <p className={`text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                    View concurrent sessions, revoke remote devices, inspect audit trails, and export access records.
+                    {t('View concurrent sessions, revoke remote devices, inspect audit trails, and export access records.')}
                   </p>
                 </div>
                 {onOpenSecurityCenter && (
@@ -691,7 +852,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     }}
                     className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-colors cursor-pointer whitespace-nowrap shadow-sm"
                   >
-                    Open Security Center
+                    {t('Open Security Center')}
                   </button>
                 )}
               </div>

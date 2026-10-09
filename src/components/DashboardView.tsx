@@ -26,6 +26,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { useLanguage } from '../context/LanguageContext';
+
 interface DashboardViewProps {
   darkMode: boolean;
   userRole: UserRole;
@@ -38,6 +40,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   userRole,
   onNavigate,
 }) => {
+  const { t } = useLanguage();
   const nationalColor = getRiskColor(NATIONAL_OVERVIEW.riskLevel);
 
   // Ranked states by stress
@@ -74,10 +77,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              National SME Stress Index
+              {t('National SME Stress Index')}
             </span>
             <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${nationalColor.bg} ${nationalColor.text}`}>
-              {NATIONAL_OVERVIEW.riskLevel}
+              {t(NATIONAL_OVERVIEW.riskLevel)}
             </span>
           </div>
 
@@ -91,7 +94,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800/80 text-xs text-slate-400">
             <TrendingUp className="w-4 h-4 text-orange-400" />
             <span>
-              <strong className="text-orange-400 font-semibold">+8.4 pts</strong> increase over prior 90-day baseline
+              <strong className="text-orange-400 font-semibold">+8.4 pts</strong> {t('increase over prior 90-day baseline', 'increase over prior 90-day baseline')}
             </span>
           </div>
         </div>
@@ -102,7 +105,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              High-Risk Regions
+              {t('High-Risk Regions')}
             </span>
             <AlertTriangle className="w-4 h-4 text-orange-400" />
           </div>
@@ -111,11 +114,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-4xl md:text-5xl font-extrabold font-mono tabular-nums text-orange-400">
               {NATIONAL_OVERVIEW.highRiskRegionsCount}
             </span>
-            <span className="text-slate-400 text-sm">of 15 States</span>
+            <span className="text-slate-400 text-sm">{t('of 15 States', 'of 15 States')}</span>
           </div>
 
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-800/80 text-xs">
-            <span className="text-slate-400">Critical Clusters:</span>
+            <span className="text-slate-400">{t('Critical Clusters:', 'Critical Clusters:')}</span>
             <span className="font-semibold text-amber-400">Surat, Tiruppur, Ludhiana</span>
           </div>
         </div>
@@ -126,7 +129,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              High-Risk Sectors
+              {t('High-Risk Sectors')}
             </span>
             <Layers className="w-4 h-4 text-red-400" />
           </div>
@@ -135,11 +138,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-4xl md:text-5xl font-extrabold font-mono tabular-nums text-red-400">
               {NATIONAL_OVERVIEW.highRiskSectorsCount}
             </span>
-            <span className="text-slate-400 text-sm">of 10 Monitored</span>
+            <span className="text-slate-400 text-sm">{t('of 10 Monitored', 'of 10 Monitored')}</span>
           </div>
 
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-800/80 text-xs">
-            <span className="text-slate-400">Lead Squeeze:</span>
+            <span className="text-slate-400">{t('Lead Squeeze:', 'Lead Squeeze:')}</span>
             <span className="font-semibold text-red-400">Textiles (78.2), Auto (68.5)</span>
           </div>
         </div>
@@ -150,7 +153,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              90-Day Trajectory Forecast
+              {t('90-Day Trajectory Forecast')}
             </span>
             <Activity className="w-4 h-4 text-amber-400" />
           </div>
@@ -177,7 +180,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-800/80 text-xs text-slate-400">
-            <span>Model Confidence:</span>
+            <span>{t('Model Confidence:')}</span>
             <span className="font-mono font-bold text-emerald-400">{NATIONAL_OVERVIEW.confidence}%</span>
           </div>
         </div>
@@ -197,7 +200,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                  AI Risk Score & Credit Grade Engine
+                  {t('AI Risk Score & Credit Grade Engine')}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping" />
@@ -205,10 +208,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </span>
               </div>
               <h3 className={`text-base font-bold mt-0.5 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                Enterprise Financial Risk Evaluation & Insolvency Early-Warning
+                {t('Enterprise Financial Risk Evaluation & Insolvency Early-Warning', 'Enterprise Financial Risk Evaluation & Insolvency Early-Warning')}
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Evaluates 5 sub-pillars (Liquidity, Debt Solvency, Operations, Supply Chain, Macro), calculates covenant rate shock tolerance, and simulates prescriptive mitigations.
+                {t('Evaluates 5 sub-pillars (Liquidity, Debt Solvency, Operations, Supply Chain, Macro), calculates covenant rate shock tolerance, and simulates prescriptive mitigations.', 'Evaluates 5 sub-pillars (Liquidity, Debt Solvency, Operations, Supply Chain, Macro), calculates covenant rate shock tolerance, and simulates prescriptive mitigations.')}
               </p>
             </div>
           </div>
@@ -219,7 +222,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="px-3.5 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Evaluate AI Risk Score</span>
+              <span>{t('Evaluate AI Risk Score')}</span>
             </button>
             <button
               onClick={() => onNavigate('heatmap')}
@@ -228,7 +231,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               }`}
             >
               <Grid className="w-3.5 h-3.5 text-rose-400" />
-              <span>Risk Heatmap</span>
+              <span>{t('Risk Heatmap')}</span>
             </button>
             <button
               onClick={() => onNavigate('cfo')}
@@ -237,7 +240,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               }`}
             >
               <Bot className="w-3.5 h-3.5 text-purple-400" />
-              <span>AI Digital CFO</span>
+              <span>{t('AI Digital CFO')}</span>
             </button>
             <button
               onClick={() => onNavigate('intervention')}
@@ -246,7 +249,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Intervention Simulator</span>
+              <span>{t('Intervention Simulator')}</span>
             </button>
             <button
               onClick={() => onNavigate('analyzer')}
@@ -254,7 +257,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 darkMode ? 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700' : 'border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200'
               }`}
             >
-              <span>Custom MSME</span>
+              <span>{t('Custom MSME', 'Custom MSME')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -419,17 +422,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className={`text-base font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                Regional Risk Ranking (Top 6 States)
+                {t('Regional Risk Ranking')} ({t('Top 6 States', 'Top 6 States')})
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                States prioritized by composite MSME stress score and credit exposure.
+                {t('States prioritized by composite MSME stress score and credit exposure.', 'States prioritized by composite MSME stress score and credit exposure.')}
               </p>
             </div>
             <button
               onClick={() => onNavigate('map')}
               className="text-xs font-semibold text-amber-500 hover:text-amber-400 flex items-center gap-1 cursor-pointer"
             >
-              <span>Explore Map</span>
+              <span>{t('Explore Map')}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -447,11 +450,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <span className="font-mono text-slate-400 font-bold w-4">#{idx + 1}</span>
                     <div>
                       <div className="font-bold text-slate-200 flex items-center gap-2">
-                        <span>{st.name}</span>
-                        <span className={`text-[10px] font-bold uppercase ${c.text}`}>({st.riskLevel})</span>
+                        <span>{t(st.name, st.name)}</span>
+                        <span className={`text-[10px] font-bold uppercase ${c.text}`}>({t(st.riskLevel, st.riskLevel)})</span>
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        {st.districts[0]?.clusterName || st.keySectors.slice(0, 2).join(', ')}
+                        {st.districts[0]?.clusterName || st.keySectors.slice(0, 2).map(s => t(s, s)).join(', ')}
                       </div>
                     </div>
                   </div>
@@ -461,7 +464,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       {st.stressScore.toFixed(1)}
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono">
-                      ₹{st.creditAtRiskCr.toLocaleString()} Cr at risk
+                      ₹{st.creditAtRiskCr.toLocaleString()} Cr {t('at risk', 'at risk')}
                     </div>
                   </div>
                 </div>
@@ -477,17 +480,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className={`text-base font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                Sector Risk Ranking (10 Monitored Verticals)
+                {t('Sector Risk Ranking')} ({t('10 Monitored Verticals', '10 Monitored Verticals')})
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Ordered by financial stress score and supply chain vulnerability.
+                {t('Ordered by financial stress score and supply chain vulnerability.', 'Ordered by financial stress score and supply chain vulnerability.')}
               </p>
             </div>
             <button
               onClick={() => onNavigate('sectors')}
               className="text-xs font-semibold text-amber-500 hover:text-amber-400 flex items-center gap-1 cursor-pointer"
             >
-              <span>All Sectors</span>
+              <span>{t('All Sectors')}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -505,10 +508,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <span className="font-mono text-slate-400 font-bold w-4">#{idx + 1}</span>
                     <div>
                       <div className="font-bold text-slate-200">
-                        {sec.name}
+                        {t(sec.name, sec.name)}
                       </div>
                       <div className="text-[11px] text-slate-400 truncate max-w-[200px] sm:max-w-xs">
-                        {sec.keyVulnerabilities[0]}
+                        {t(sec.keyVulnerabilities[0], sec.keyVulnerabilities[0])}
                       </div>
                     </div>
                   </div>
@@ -534,10 +537,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       }`}>
         <div className="flex items-center gap-3 min-w-0">
           <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase shrink-0">
-            Active Warning
+            {t('Active Warning')}
           </span>
           <p className="text-xs text-slate-300 truncate">
-            <strong>{EARLY_WARNING_ALERTS[0].region}:</strong> {EARLY_WARNING_ALERTS[0].headline}
+            <strong>{t(EARLY_WARNING_ALERTS[0].region, EARLY_WARNING_ALERTS[0].region)}:</strong> {t(EARLY_WARNING_ALERTS[0].headline, EARLY_WARNING_ALERTS[0].headline)}
           </p>
         </div>
 
@@ -545,7 +548,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           onClick={() => onNavigate('alerts')}
           className="shrink-0 text-xs font-semibold text-amber-500 hover:text-amber-400 flex items-center gap-1 cursor-pointer"
         >
-          <span>View All ({EARLY_WARNING_ALERTS.length})</span>
+          <span>{t('View All')} ({EARLY_WARNING_ALERTS.length})</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>

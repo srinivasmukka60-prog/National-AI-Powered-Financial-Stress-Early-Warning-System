@@ -443,11 +443,11 @@ export const GlobalSearchPalette: React.FC<GlobalSearchPaletteProps> = ({
     },
     {
       id: 'action-language',
-      title: 'Switch App Language (English, Telugu, Hindi, Marathi)',
+      title: 'Switch App Language (21 Indian & Global Languages)',
       category: 'Actions',
-      subtitle: 'Change whole application interface language to English, తెలుగు, हिन्दी, or मराठी',
+      subtitle: 'Change whole application interface language (Hindi, Telugu, Tamil, Marathi, Kannada, Spanish, French, etc.)',
       icon: Globe,
-      tags: ['language', 'english', 'telugu', 'తెలుగు', 'hindi', 'हिन्दी', 'marathi', 'मराठी', 'translate'],
+      tags: ['language', 'english', 'telugu', 'తెలుగు', 'hindi', 'हिन्दी', 'marathi', 'मराठी', 'tamil', 'தமிழ்', 'kannada', 'bengali', 'gujarati', 'malayalam', 'punjabi', 'odia', 'urdu', 'spanish', 'french', 'german', 'arabic', 'japanese', 'chinese', 'translate'],
       action: 'language',
     },
     {

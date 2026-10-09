@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Lock, Unlock, KeyRound, LogOut, ShieldAlert, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SessionLockOverlayProps {
-  darkMode: boolean;
+  darkMode?: boolean;
 }
 
-export const SessionLockOverlay: React.FC<SessionLockOverlayProps> = ({ darkMode }) => {
+export const SessionLockOverlay: React.FC<SessionLockOverlayProps> = ({ darkMode = true }) => {
   const { isLocked, user, unlockSession, logout, pinCode } = useAuth();
+  const { t } = useLanguage();
   const [pinInput, setPinInput] = useState('');
   const [errorShake, setErrorShake] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -75,7 +77,7 @@ export const SessionLockOverlay: React.FC<SessionLockOverlayProps> = ({ darkMode
           {user.role}
         </p>
         <span className="text-[10px] mt-1 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-sky-950/40 text-sky-300 border border-sky-800/40">
-          Terminal Session Locked
+          {t('Terminal Session Locked')}
         </span>
 
         {/* PIN Entry Display */}
@@ -97,7 +99,7 @@ export const SessionLockOverlay: React.FC<SessionLockOverlayProps> = ({ darkMode
             <input
               type="password"
               inputMode="numeric"
-              placeholder="Enter PIN..."
+              placeholder={t('Enter PIN...', 'Enter PIN...')}
               value={pinInput}
               onChange={(e) => setPinInput(e.target.value)}
               className="sr-only"
@@ -169,7 +171,7 @@ export const SessionLockOverlay: React.FC<SessionLockOverlayProps> = ({ darkMode
               }}
               className="font-mono text-sky-400 font-bold hover:underline cursor-pointer"
             >
-              {pinCode} (Click to Unlock)
+              {pinCode} ({t('Click to Unlock', 'Click to Unlock')})
             </button>
           </div>
         </form>
@@ -181,11 +183,11 @@ export const SessionLockOverlay: React.FC<SessionLockOverlayProps> = ({ darkMode
             className="text-slate-400 hover:text-rose-400 transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Switch / Sign Out</span>
+            <span>{t('Switch / Sign Out')}</span>
           </button>
 
           <span className="text-[10px] text-slate-500">
-            Protected by Sentinel Shield
+            {t('Protected by Sentinel Shield')}
           </span>
         </div>
       </div>

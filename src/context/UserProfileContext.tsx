@@ -109,6 +109,31 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return PRESET_PROFILES[0];
   });
 
+  // Keep user profile in sync when authentication state changes or new user registers
+  useEffect(() => {
+    const handleProfileUpdate = (e: any) => {
+      if (e.detail) {
+        setProfileState(e.detail);
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          setProfileState(JSON.parse(e.newValue));
+        } catch {}
+      }
+    };
+
+    window.addEventListener('sme_user_profile_updated', handleProfileUpdate as EventListener);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('sme_user_profile_updated', handleProfileUpdate as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const setProfile = (newProfile: UserProfile) => {
     setProfileState(newProfile);
     try {

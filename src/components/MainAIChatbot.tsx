@@ -21,8 +21,8 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { NATIONAL_OVERVIEW, STATES_DATA, SECTORS_DATA, EARLY_WARNING_ALERTS } from '../data/indiaData';
-import { ApiClient } from '../services/apiClient';
 import { useLanguage } from '../context/LanguageContext';
+import { SUPPORTED_LANGUAGES } from '../utils/translations';
 
 interface MainAIChatbotProps {
   darkMode: boolean;
@@ -89,12 +89,9 @@ export const MainAIChatbot: React.FC<MainAIChatbotProps> = ({
       try {
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
-        const langDirective = language === 'te'
-          ? 'Respond fluently in Telugu (తెలుగు) using polite, natural language.'
-          : language === 'hi'
-          ? 'Respond fluently in Hindi (हिन्दी) using polite, natural language.'
-          : language === 'mr'
-          ? 'Respond fluently in Marathi (मराठी) using polite, natural language.'
+        const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === language);
+        const langDirective = (language && language !== 'en' && currentLangObj)
+          ? `Respond fluently in ${currentLangObj.name} (${currentLangObj.nativeName}) using polite, natural, professional phrasing.`
           : 'Respond in English.';
 
         const prompt = `You are SME-SENTINEL AI, an intelligent, friendly, and helpful AI assistant for the National MSME Financial Stress Early Warning platform.

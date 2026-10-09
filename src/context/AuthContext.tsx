@@ -1,4 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import {
+  getSupabaseConfig,
+  setSupabaseConfig,
+  clearSupabaseConfig,
+  supabaseSignIn,
+  supabaseSignUp,
+  supabaseSignOut,
+  supabaseGetSession,
+  supabaseOnAuthStateChange,
+  SupabaseConfig,
+} from '../services/supabase';
 
 export interface UserSession {
   id: string;
@@ -58,6 +69,9 @@ export interface AuthContextType {
   lastSmsOtp: string | null;
   backupCodes: string[];
   twoFactorSecret: string;
+  supabaseConfig: SupabaseConfig;
+  saveSupabaseKeys: (url: string, anonKey: string) => void;
+  clearSupabaseKeys: () => void;
   login: (email: string, password?: string, remember?: boolean) => Promise<boolean>;
   fastLoginAs: (presetId: string) => void;
   signup: (userData: Partial<AuthUser>, password?: string) => Promise<boolean>;
@@ -215,12 +229,13 @@ const INITIAL_AUDIT_LOGS: SecurityAuditLog[] = [
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Authentication is mandatory on first load unless already verified
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('sme_auth_authenticated');
-      return saved !== null ? saved === 'true' : true; // Default true so user is signed in on first load
+      return saved === 'true'; // Default FALSE so user must authenticate
     } catch {
-      return true;
+      return false;
     }
   });
 
@@ -274,8 +289,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [twoFactorPending, setTwoFactorPending] = useState<boolean>(false);
   const [lastSmsOtp, setLastSmsOtp] = useState<string>('582914');
+  const [supabaseConfig, setSupabaseConfigState] = useState<SupabaseConfig>(getSupabaseConfig());
   const pendingUserRef = useRef<AuthUser | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
+
+  // Synchronize authenticated user details across the entire application
+  const syncToUserProfile = (authUser: AuthUser) => {
+    try {
+      const updatedProfile = {
+        id: authUser.id,
+        name: authUser.name,
+        title: authUser.role,
+        email: authUser.email,
+        role: authUser.role,
+        organization: authUser.organization,
+        avatarUrl: authUser.avatarUrl,
+      };
+      localStorage.setItem('sme_app_user_profile', JSON.stringify(updatedProfile));
+      window.dispatchEvent(new CustomEvent('sme_user_profile_updated', { detail: updatedProfile }));
+    } catch (e) {
+      console.warn('Profile sync warning:', e);
+    }
+  };
+
+  const saveSupabaseKeys = (url: string, anonKey: string) => {
+    setSupabaseConfig(url, anonKey);
+    const updated = getSupabaseConfig();
+    setSupabaseConfigState(updated);
+    recordAuditLog('Supabase Keys Configured', 'system', `Updated Supabase URL and Anon Key`, 'medium');
+  };
+
+  const clearSupabaseKeys = () => {
+    clearSupabaseConfig();
+    setSupabaseConfigState(getSupabaseConfig());
+    recordAuditLog('Supabase Keys Removed', 'system', 'Supabase credentials cleared', 'low');
+  };
 
   // Record Audit Log helper
   const recordAuditLog = (
@@ -301,6 +349,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return updated;
     });
   };
+
+  // Check Supabase session on mount & subscribe to real-time auth changes
+  useEffect(() => {
+    const checkSupabase = async () => {
+      try {
+        const session = await supabaseGetSession();
+        if (session && session.user) {
+          const supaUser = session.user;
+          const metadata = supaUser.user_metadata || {};
+          const authUser: AuthUser = {
+            id: supaUser.id,
+            name: metadata.full_name || metadata.name || supaUser.email?.split('@')[0] || 'Authenticated User',
+            email: supaUser.email || '',
+            phone: metadata.phone || supaUser.phone || '+91 98490 28410',
+            role: metadata.role || 'Partner & Financial Director',
+            organization: metadata.organization || 'Agency Book Financial Advisory Group',
+            avatarUrl: metadata.avatar_url || DEFAULT_USER.avatarUrl,
+            twoFactorEnabled: false,
+            twoFactorMethod: 'both',
+            securityRating: 'A+ Supabase Verified',
+          };
+          setUser(authUser);
+          setIsAuthenticated(true);
+          syncToUserProfile(authUser);
+          localStorage.setItem('sme_auth_authenticated', 'true');
+          localStorage.setItem('sme_auth_user', JSON.stringify(authUser));
+        }
+      } catch (err) {
+        console.warn('Supabase initial session check:', err);
+      }
+    };
+
+    checkSupabase();
+
+    const { unsubscribe } = supabaseOnAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+        const supaUser = session.user;
+        const metadata = supaUser.user_metadata || {};
+        const authUser: AuthUser = {
+          id: supaUser.id,
+          name: metadata.full_name || metadata.name || supaUser.email?.split('@')[0] || 'Authenticated User',
+          email: supaUser.email || '',
+          phone: metadata.phone || supaUser.phone || '+91 98490 28410',
+          role: metadata.role || 'Partner & Financial Director',
+          organization: metadata.organization || 'Agency Book Financial Advisory Group',
+          avatarUrl: metadata.avatar_url || DEFAULT_USER.avatarUrl,
+          twoFactorEnabled: false,
+          twoFactorMethod: 'both',
+          securityRating: 'A+ Supabase Verified',
+        };
+        setUser(authUser);
+        setIsAuthenticated(true);
+        syncToUserProfile(authUser);
+        localStorage.setItem('sme_auth_authenticated', 'true');
+        localStorage.setItem('sme_auth_user', JSON.stringify(authUser));
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+        localStorage.setItem('sme_auth_authenticated', 'false');
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Inactivity auto-lock timer
   useEffect(() => {
@@ -331,8 +444,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [isAuthenticated, isLocked, autoLockMinutes]);
 
-  const login = async (email: string, _password?: string, _remember: boolean = true): Promise<boolean> => {
-    // Find matching account or fallback to first
+  const login = async (email: string, password?: string, _remember: boolean = true): Promise<boolean> => {
+    const config = getSupabaseConfig();
+
+    // 1. If Supabase keys are configured and password is provided, attempt Supabase Auth
+    if (config.isConfigured && password) {
+      try {
+        const data = await supabaseSignIn(email, password);
+        if (data && data.user) {
+          const supaUser = data.user;
+          const metadata = supaUser.user_metadata || {};
+          const authUser: AuthUser = {
+            id: supaUser.id,
+            name: metadata.full_name || metadata.name || email.split('@')[0].toUpperCase(),
+            email: supaUser.email || email,
+            phone: metadata.phone || supaUser.phone || '+91 98490 28410',
+            role: metadata.role || 'Partner & Financial Director',
+            organization: metadata.organization || 'Agency Book Financial Advisory Group',
+            avatarUrl: metadata.avatar_url || DEFAULT_USER.avatarUrl,
+            twoFactorEnabled: false,
+            twoFactorMethod: 'both',
+            securityRating: 'A+ Supabase Verified',
+          };
+          setUser(authUser);
+          setIsAuthenticated(true);
+          setIsLocked(false);
+          setTwoFactorPending(false);
+          syncToUserProfile(authUser);
+          try {
+            localStorage.setItem('sme_auth_authenticated', 'true');
+            localStorage.setItem('sme_auth_locked', 'false');
+            localStorage.setItem('sme_auth_user', JSON.stringify(authUser));
+          } catch {}
+          recordAuditLog('Supabase Cloud Sign-In Successful', 'auth', `Authorized login via Supabase as ${authUser.email}`, 'low');
+          return true;
+        }
+      } catch (err: any) {
+        console.warn('Supabase sign-in error:', err);
+        throw err;
+      }
+    }
+
+    // 2. Demo fallback matching preset account or local dev user
     const matched = DEMO_AUTH_ACCOUNTS.find((a) => a.email.toLowerCase() === email.toLowerCase()) || {
       ...DEFAULT_USER,
       email,
@@ -348,6 +501,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(matched);
     setIsAuthenticated(true);
     setIsLocked(false);
+    syncToUserProfile(matched);
     try {
       localStorage.setItem('sme_auth_authenticated', 'true');
       localStorage.setItem('sme_auth_locked', 'false');
@@ -368,6 +522,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthenticated(true);
     setIsLocked(false);
     setTwoFactorPending(false);
+    syncToUserProfile(matched);
     try {
       localStorage.setItem('sme_auth_authenticated', 'true');
       localStorage.setItem('sme_auth_locked', 'false');
@@ -376,11 +531,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     recordAuditLog('Fast-Pass Enterprise Login', 'auth', `Quick sign-in activated for ${matched.name}`, 'low');
   };
 
-  const signup = async (userData: Partial<AuthUser>, _password?: string): Promise<boolean> => {
+  const signup = async (userData: Partial<AuthUser>, password?: string): Promise<boolean> => {
+    const config = getSupabaseConfig();
+
+    // 1. If Supabase is configured, register via Supabase Auth
+    if (config.isConfigured && userData.email && password) {
+      try {
+        const data = await supabaseSignUp(userData.email, password, {
+          name: userData.name,
+          role: userData.role,
+          organization: userData.organization,
+          phone: userData.phone,
+        });
+
+        const supaUser = data.user;
+        const metadata = supaUser?.user_metadata || {};
+        const newUser: AuthUser = {
+          id: supaUser?.id || 'usr_' + Date.now(),
+          name: userData.name || metadata.full_name || userData.email.split('@')[0],
+          email: userData.email,
+          phone: userData.phone || '+91 98490 28410',
+          role: userData.role || 'Executive / Financial Controller',
+          organization: userData.organization || 'SME Enterprise Advisory',
+          avatarUrl: userData.avatarUrl || DEFAULT_USER.avatarUrl,
+          twoFactorEnabled: false,
+          securityRating: 'A+ Supabase Verified',
+        };
+
+        setUser(newUser);
+        setIsAuthenticated(true);
+        setIsLocked(false);
+        syncToUserProfile(newUser);
+        try {
+          localStorage.setItem('sme_auth_authenticated', 'true');
+          localStorage.setItem('sme_auth_locked', 'false');
+          localStorage.setItem('sme_auth_user', JSON.stringify(newUser));
+        } catch {}
+        recordAuditLog('Supabase User Registered', 'auth', `Created user account for ${newUser.email}`, 'low');
+        return true;
+      } catch (err: any) {
+        console.warn('Supabase sign-up error:', err);
+        throw err;
+      }
+    }
+
+    // 2. Standard local dev registration fallback
     const newUser: AuthUser = {
       id: 'usr_' + Date.now(),
       name: userData.name || 'New Financial Director',
       email: userData.email || 'director@enterprise.in',
+      phone: userData.phone || '+91 98490 28410',
       role: userData.role || 'Executive / Financial Controller',
       organization: userData.organization || 'SME Enterprise Advisory',
       avatarUrl: userData.avatarUrl || DEFAULT_USER.avatarUrl,
@@ -390,6 +590,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(newUser);
     setIsAuthenticated(true);
     setIsLocked(false);
+    syncToUserProfile(newUser);
     try {
       localStorage.setItem('sme_auth_authenticated', 'true');
       localStorage.setItem('sme_auth_locked', 'false');
@@ -400,6 +601,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    supabaseSignOut();
     setIsAuthenticated(false);
     setIsLocked(false);
     setTwoFactorPending(false);
@@ -572,6 +774,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sendSmsOtp,
         backupCodes: DEMO_2FA_BACKUP_CODES,
         twoFactorSecret: DEMO_2FA_SECRET,
+        supabaseConfig,
+        saveSupabaseKeys,
+        clearSupabaseKeys,
         login,
         fastLoginAs,
         signup,
