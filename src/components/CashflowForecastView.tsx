@@ -329,13 +329,13 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-sky-400 uppercase tracking-wider mb-1">
               <Zap className="w-3.5 h-3.5" />
-              <span>Predictive Treasury Engine · 13-Week Liquidity & Cash Runway</span>
+              <span>{t('cashflow_badge', 'Predictive Treasury Engine · 13-Week Liquidity & Cash Runway')}</span>
             </div>
             <h1 className={`text-xl md:text-2xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-              Corporate Cash-Flow Forecasting & Solvency Guard
+              {t('cashflow_hero_title', 'Corporate Cash-Flow Forecasting & Solvency Guard')}
             </h1>
             <p className={`text-xs mt-1 max-w-2xl ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              Model cash collection trajectories, simulate debtor payment slippages (DSO), test OpEx inflation shocks, and track the exact zero-cash depletion date.
+              {t('cashflow_hero_subtitle', 'Model cash collection trajectories, simulate debtor payment slippages (DSO), test OpEx inflation shocks, and track the exact zero-cash depletion date.')}
             </p>
           </div>
 
@@ -364,9 +364,9 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
               }`}
             >
               {[
-                { id: '13week', label: '13-Week Treasury' },
-                { id: '30day', label: '30-Day Daily' },
-                { id: '12month', label: '12-Month Runway' },
+                { id: '13week', label: t('horizon_13w', '13-Week Treasury') },
+                { id: '30day', label: t('horizon_30d', '30-Day Daily') },
+                { id: '12month', label: t('horizon_12m', '12-Month Runway') },
               ].map((h) => (
                 <button
                   key={h.id}
@@ -395,7 +395,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
               title="Export 13-week cashflow schedule to CSV"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
+              <span>{t('export_csv', 'Export CSV')}</span>
             </button>
           </div>
         </div>
@@ -403,12 +403,12 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
         {/* Quick Scenario Preset Pills */}
         <div className="mt-5 pt-4 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <span className={`font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Stress Scenarios:</span>
+            <span className={`font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t('stress_scenarios_label', 'Stress Scenarios:')}</span>
             <div className="flex items-center gap-1.5">
               {[
-                { id: 'base', label: 'Base Plan (Expected)' },
-                { id: 'stress', label: 'Severe Stress (DSO +25d, -15% Sales)' },
-                { id: 'optimistic', label: 'Optimistic (TReDS Cash Boost)' },
+                { id: 'base', label: t('scenario_base', 'Base Plan (Expected)') },
+                { id: 'stress', label: t('scenario_stress', 'Severe Stress (DSO +25d, -15% Sales)') },
+                { id: 'optimistic', label: t('scenario_optimistic', 'Optimistic (TReDS Cash Boost)') },
               ].map((sc) => (
                 <button
                   key={sc.id}
@@ -429,14 +429,14 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
 
           <div className="flex items-center gap-3">
             <span className={`text-[11px] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              Safety Cash Buffer Threshold: <strong className="text-amber-400">{currSymbol}{profile.safetyBuffer.toLocaleString()}</strong>
+              {t('safety_buffer_label', 'Safety Cash Buffer Threshold:')} <strong className="text-amber-400">{currSymbol}{profile.safetyBuffer.toLocaleString()}</strong>
             </span>
             <button
               onClick={handleResetLevers}
               className={`flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-sky-400 transition-colors cursor-pointer`}
             >
               <RotateCcw className="w-3 h-3" />
-              <span>Reset Levers</span>
+              <span>{t('reset_levers', 'Reset Levers')}</span>
             </button>
           </div>
         </div>
@@ -451,14 +451,14 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Opening Liquidity</span>
+            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t('opening_liquidity', 'Opening Liquidity')}</span>
             <Building2 className="w-4 h-4 text-sky-400" />
           </div>
           <div className="text-xl font-bold font-mono mt-2">
             {currSymbol}{summaryMetrics.opening.toLocaleString()}
           </div>
           <div className={`text-[11px] mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-            Starting bank & cash equivalent
+            {t('starting_bank_equiv', 'Starting bank & cash equivalent')}
           </div>
         </div>
 
@@ -469,7 +469,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Horizon Net Delta</span>
+            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t('horizon_net_delta', 'Horizon Net Delta')}</span>
             {summaryMetrics.netTotal >= 0 ? (
               <TrendingUp className="w-4 h-4 text-emerald-400" />
             ) : (
@@ -484,7 +484,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
             {summaryMetrics.netTotal >= 0 ? '+' : ''}{currSymbol}{summaryMetrics.netTotal.toLocaleString()}
           </div>
           <div className={`text-[11px] mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-            Inflow ({currSymbol}{Math.round(summaryMetrics.totalInflows / 1000)}k) vs Outflow
+            {t('inflow_label', 'Inflow')} ({currSymbol}{Math.round(summaryMetrics.totalInflows / 1000)}k) vs {t('outflow_label', 'Outflow')}
           </div>
         </div>
 
@@ -495,7 +495,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Cash Trough (Pinch)</span>
+            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t('cash_trough', 'Cash Trough (Pinch)')}</span>
             <AlertTriangle className={`w-4 h-4 ${summaryMetrics.minCash < profile.safetyBuffer ? 'text-amber-400' : 'text-slate-400'}`} />
           </div>
           <div
@@ -510,7 +510,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
             {currSymbol}{summaryMetrics.minCash.toLocaleString()}
           </div>
           <div className={`text-[11px] mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-            Lowest balance hit at <strong className="text-slate-200">{summaryMetrics.troughPeriod}</strong>
+            {t('lowest_balance_hit', 'Lowest balance hit at')} <strong className="text-slate-200">{summaryMetrics.troughPeriod}</strong>
           </div>
         </div>
 
@@ -521,14 +521,14 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Cash Runway</span>
+            <span className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t('cash_runway', 'Cash Runway')}</span>
             <Clock className="w-4 h-4 text-purple-400" />
           </div>
           <div className="text-xl font-bold font-mono mt-2 text-purple-400">
             {summaryMetrics.runwayMonths} Mo
           </div>
           <div className={`text-[11px] mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-            At projected burn & collections
+            {t('runway_projected_desc', 'At projected burn & collections')}
           </div>
         </div>
 
@@ -543,7 +543,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider">Solvency Guard</span>
+            <span className="text-xs font-bold uppercase tracking-wider">{t('solvency_guard', 'Solvency Guard')}</span>
             {summaryMetrics.status === 'critical' ? (
               <Flame className="w-4 h-4 text-rose-400" />
             ) : summaryMetrics.status === 'warning' ? (
@@ -554,17 +554,17 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           </div>
           <div className="text-sm font-bold mt-2">
             {summaryMetrics.status === 'critical'
-              ? `Deficit by ${summaryMetrics.zeroCashPeriod}`
+              ? `${t('deficit_by', 'Deficit by')} ${summaryMetrics.zeroCashPeriod}`
               : summaryMetrics.status === 'warning'
-              ? 'Buffer Breached'
-              : 'Liquidity Secured'}
+              ? t('buffer_breached', 'Buffer Breached')
+              : t('liquidity_secured', 'Liquidity Secured')}
           </div>
           <div className="text-[11px] mt-1 opacity-80">
             {summaryMetrics.status === 'critical'
-              ? 'Negative cash projected'
+              ? t('negative_cash_proj', 'Negative cash projected')
               : summaryMetrics.status === 'warning'
-              ? 'Falls below safety reserve'
-              : 'Reserves remain above minimum'}
+              ? t('falls_below_reserve', 'Falls below safety reserve')
+              : t('reserves_above_min', 'Reserves remain above minimum')}
           </div>
         </div>
       </div>
@@ -580,25 +580,25 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <div>
               <h3 className="text-base font-bold tracking-tight">
-                Cash Inflow vs Outflow & Closing Trajectory
+                {t('chart_inflow_outflow_title', 'Cash Inflow vs Outflow & Closing Trajectory')}
               </h3>
               <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                Visualizing weekly cash receipts, OpEx/debt burns, and resulting ending bank balance
+                {t('chart_inflow_outflow_subtitle', 'Visualizing weekly cash receipts, OpEx/debt burns, and resulting ending bank balance')}
               </p>
             </div>
 
             <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                <span className={darkMode ? 'text-slate-300' : 'text-slate-600'}>Inflow</span>
+                <span className={darkMode ? 'text-slate-300' : 'text-slate-600'}>{t('inflow_label', 'Inflow')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
-                <span className={darkMode ? 'text-slate-300' : 'text-slate-600'}>Outflow</span>
+                <span className={darkMode ? 'text-slate-300' : 'text-slate-600'}>{t('outflow_label', 'Outflow')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-1 bg-sky-400 rounded-full" />
-                <span className={darkMode ? 'text-slate-300' : 'text-slate-600'}>Closing Cash</span>
+                <span className={darkMode ? 'text-slate-300' : 'text-slate-600'}>{t('closing_cash_label', 'Closing Cash')}</span>
               </div>
             </div>
           </div>
@@ -759,20 +759,20 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-sky-400" />
-                <h3 className="font-bold text-sm">Working Capital Simulation Levers</h3>
+                <h3 className="font-bold text-sm">{t('simulation_levers_title', 'Working Capital Simulation Levers')}</h3>
               </div>
               <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-sky-500/15 text-sky-400">
                 Interactive
               </span>
             </div>
             <p className={`text-xs mb-4 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              Adjust operational friction sliders to immediately see cashflow impacts on liquidity.
+              {t('simulation_levers_subtitle', 'Adjust operational friction sliders to immediately see cashflow impacts on liquidity.')}
             </p>
 
             {/* Slider 1: DSO Debtor Delay */}
             <div className="space-y-1.5 mb-4">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-300">Customer Debtor Delay (DSO)</span>
+                <span className="font-medium text-slate-300">{t('lever_dso_title', 'Customer Debtor Delay (DSO)')}</span>
                 <span className={`font-mono font-bold ${dsoAdjustment > 0 ? 'text-rose-400' : dsoAdjustment < 0 ? 'text-emerald-400' : 'text-slate-200'}`}>
                   {dsoAdjustment > 0 ? `+${dsoAdjustment} Days` : dsoAdjustment < 0 ? `${dsoAdjustment} Days` : 'Normal (0d)'}
                 </span>
@@ -787,16 +787,16 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
                 className="w-full accent-sky-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>-20d (Fast)</span>
+                <span>-20d</span>
                 <span>Base ({profile.baseDSO}d)</span>
-                <span>+40d (Severe Delay)</span>
+                <span>+40d</span>
               </div>
             </div>
 
             {/* Slider 2: Sales Revenue Shock */}
             <div className="space-y-1.5 mb-4">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-300">Sales Order Volume Delta</span>
+                <span className="font-medium text-slate-300">{t('lever_sales_title', 'Sales Order Volume Delta')}</span>
                 <span className={`font-mono font-bold ${revenueDeltaPct > 0 ? 'text-emerald-400' : revenueDeltaPct < 0 ? 'text-rose-400' : 'text-slate-200'}`}>
                   {revenueDeltaPct > 0 ? `+${revenueDeltaPct}%` : `${revenueDeltaPct}%`}
                 </span>
@@ -811,16 +811,16 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
                 className="w-full accent-sky-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>-30% Drop</span>
-                <span>0% Target</span>
-                <span>+30% Boom</span>
+                <span>-30%</span>
+                <span>0%</span>
+                <span>+30%</span>
               </div>
             </div>
 
             {/* Slider 3: OpEx Inflation */}
             <div className="space-y-1.5 mb-5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-300">Operating Cost & Raw Material Delta</span>
+                <span className="font-medium text-slate-300">{t('lever_opex_title', 'Operating Cost & Raw Material Delta')}</span>
                 <span className={`font-mono font-bold ${opexInflationPct > 0 ? 'text-rose-400' : opexInflationPct < 0 ? 'text-emerald-400' : 'text-slate-200'}`}>
                   {opexInflationPct > 0 ? `+${opexInflationPct}%` : `${opexInflationPct}%`}
                 </span>
@@ -835,16 +835,16 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
                 className="w-full accent-sky-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>-20% Cut</span>
-                <span>0% Normal</span>
-                <span>+25% Inflation</span>
+                <span>-20%</span>
+                <span>0%</span>
+                <span>+25%</span>
               </div>
             </div>
 
             {/* Rapid Liquidity Levers */}
             <div className="pt-4 border-t border-slate-800 space-y-2.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                Emergency Liquidity Interventions:
+                {t('emergency_interventions_title', 'Emergency Liquidity Interventions:')}
               </span>
 
               <label
@@ -862,8 +862,8 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
                     className="w-4 h-4 accent-sky-500 rounded"
                   />
                   <div>
-                    <div className="text-xs font-semibold">TReDS Invoice Liquidation</div>
-                    <div className="text-[10px] opacity-80">+45% instant cash injection at W2</div>
+                    <div className="text-xs font-semibold">{t('treds_liquidation', 'TReDS Invoice Liquidation')}</div>
+                    <div className="text-[10px] opacity-80">{t('treds_liquidation_desc', '+45% instant cash injection at W2')}</div>
                   </div>
                 </div>
                 <Zap className="w-3.5 h-3.5 text-sky-400" />
@@ -884,8 +884,8 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
                     className="w-4 h-4 accent-emerald-500 rounded"
                   />
                   <div>
-                    <div className="text-xs font-semibold">Freeze Discretionary OpEx/Capex</div>
-                    <div className="text-[10px] opacity-80">Saves ~9% weekly cash outflows</div>
+                    <div className="text-xs font-semibold">{t('freeze_opex', 'Freeze Discretionary OpEx/Capex')}</div>
+                    <div className="text-[10px] opacity-80">{t('freeze_opex_desc', 'Saves ~9% weekly cash outflows')}</div>
                   </div>
                 </div>
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
@@ -906,8 +906,8 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
                     className="w-4 h-4 accent-purple-500 rounded"
                   />
                   <div>
-                    <div className="text-xs font-semibold">Draw Revolving Credit Facility</div>
-                    <div className="text-[10px] opacity-80">Adds +{currSymbol}{Math.round(profile.safetyBuffer * 0.8 / 1000)}k safety buffer</div>
+                    <div className="text-xs font-semibold">{t('draw_credit_facility', 'Draw Revolving Credit Facility')}</div>
+                    <div className="text-[10px] opacity-80">+{currSymbol}{Math.round(profile.safetyBuffer * 0.8 / 1000)}k safety buffer</div>
                   </div>
                 </div>
                 <Layers className="w-3.5 h-3.5 text-purple-400" />
@@ -922,7 +922,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
               className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
             >
               <Bot className="w-4 h-4" />
-              <span>Ask AI Digital CFO for Liquidity Plan</span>
+              <span>{t('ask_cfo_liquidity', 'Ask AI Digital CFO for Liquidity Plan')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -939,7 +939,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-sky-400" />
             <h3 className="font-bold text-sm">
-              {horizon === '13week' ? '13-Week Treasury Liquidity Schedule' : horizon === '30day' ? '30-Day Cash Schedule' : '12-Month Cashflow Schedule'}
+              {t('period_schedule_title', 'Treasury Liquidity Schedule')}
             </h3>
           </div>
 
@@ -947,7 +947,7 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
             onClick={() => setShowTableDetails(!showTableDetails)}
             className="text-xs text-sky-400 hover:text-sky-300 font-semibold cursor-pointer"
           >
-            {showTableDetails ? 'Collapse Table' : 'Expand Schedule'}
+            {showTableDetails ? t('collapse_table', 'Collapse Table') : t('expand_schedule', 'Expand Schedule')}
           </button>
         </div>
 
@@ -957,11 +957,11 @@ export const CashflowForecastView: React.FC<CashflowForecastViewProps> = ({
               <thead>
                 <tr className={`border-b ${darkMode ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
                   <th className="py-2.5 px-3">Period</th>
-                  <th className="py-2.5 px-3">Expected Inflows</th>
-                  <th className="py-2.5 px-3">Operating Outflows</th>
-                  <th className="py-2.5 px-3">Net Period Delta</th>
-                  <th className="py-2.5 px-3">Ending Cash Balance</th>
-                  <th className="py-2.5 px-3">Liquidity Status</th>
+                  <th className="py-2.5 px-3">{t('expected_inflows', 'Expected Inflows')}</th>
+                  <th className="py-2.5 px-3">{t('operating_outflows', 'Operating Outflows')}</th>
+                  <th className="py-2.5 px-3">{t('net_period_delta', 'Net Period Delta')}</th>
+                  <th className="py-2.5 px-3">{t('ending_cash_balance', 'Ending Cash Balance')}</th>
+                  <th className="py-2.5 px-3">{t('liquidity_status', 'Liquidity Status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-sans">

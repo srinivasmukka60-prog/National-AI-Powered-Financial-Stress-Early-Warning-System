@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   ExternalLink,
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface RiskHeatmapViewProps {
   darkMode: boolean;
@@ -43,6 +44,7 @@ interface CellData {
 }
 
 export const RiskHeatmapView: React.FC<RiskHeatmapViewProps> = ({ darkMode, onNavigate }) => {
+  const { t } = useLanguage();
   const [viewMode, setViewMode] = useState<ViewMode>('matrix2d');
   const [metric, setMetric] = useState<HeatmapMetric>('stressScore');
   const [riskFilter, setRiskFilter] = useState<'all' | 'critical' | 'high_critical'>('all');
@@ -191,13 +193,13 @@ export const RiskHeatmapView: React.FC<RiskHeatmapViewProps> = ({ darkMode, onNa
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-rose-400 uppercase tracking-wider mb-1">
               <Flame className="w-3.5 h-3.5 animate-pulse" />
-              <span>Multi-Dimensional Thermal Risk Heatmap</span>
+              <span>{t('risk_heatmap', 'Multi-Dimensional Thermal Risk Heatmap')}</span>
             </div>
             <h2 className={`text-xl md:text-2xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-              Industrial Cluster & Regional Risk Exposure Matrix
+              {t('heatmap_title', 'Industrial Cluster & Regional Risk Exposure Matrix')}
             </h2>
             <p className="text-xs md:text-sm text-slate-400 mt-1">
-              Visualize financial contagion density across 15 states and 10 manufacturing sectors. Isolate systemic solvency threats and receivables logjams.
+              {t('heatmap_subtitle', 'Visualize financial contagion density across 15 states and 10 manufacturing sectors. Isolate systemic solvency threats and receivables logjams.')}
             </p>
           </div>
 
@@ -215,7 +217,7 @@ export const RiskHeatmapView: React.FC<RiskHeatmapViewProps> = ({ darkMode, onNa
                 }`}
               >
                 <Grid className="w-3.5 h-3.5" />
-                <span>State × Sector Grid</span>
+                <span>{t('matrix_view_2d', 'State × Sector Grid')}</span>
               </button>
               <button
                 onClick={() => setViewMode('erm5x5')}
@@ -226,7 +228,7 @@ export const RiskHeatmapView: React.FC<RiskHeatmapViewProps> = ({ darkMode, onNa
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>5×5 ERM Matrix</span>
+                <span>{t('erm_view_5x5', '5×5 ERM Matrix')}</span>
               </button>
             </div>
           </div>
@@ -236,13 +238,13 @@ export const RiskHeatmapView: React.FC<RiskHeatmapViewProps> = ({ darkMode, onNa
         <div className="mt-5 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
           {/* Metric Selector */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-semibold">Heatmap Metric:</span>
+            <span className="text-xs text-slate-400 font-semibold">{t('metric', 'Heatmap Metric')}:</span>
             <div className="flex flex-wrap items-center gap-1.5">
               {[
-                { id: 'stressScore', label: 'Financial Stress (0–100)' },
-                { id: 'creditAtRisk', label: 'Credit at Risk (₹ Cr)' },
-                { id: 'receivablesDays', label: 'Debtor DSO (Days)' },
-                { id: 'forecast90', label: '90-Day Trajectory' },
+                { id: 'stressScore', label: t('metric_stress_score', 'Financial Stress (0–100)') },
+                { id: 'creditAtRisk', label: t('metric_credit_at_risk', 'Credit at Risk (₹ Cr)') },
+                { id: 'receivablesDays', label: t('metric_receivables_days', 'Debtor DSO (Days)') },
+                { id: 'forecast90', label: t('metric_forecast_90d', '90-Day Trajectory') },
               ].map((m) => (
                 <button
                   key={m.id}
@@ -263,12 +265,12 @@ export const RiskHeatmapView: React.FC<RiskHeatmapViewProps> = ({ darkMode, onNa
 
           {/* Filter Threshold */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-semibold">Risk Filter:</span>
+            <span className="text-xs text-slate-400 font-semibold">{t('filter', 'Risk Filter')}:</span>
             <div className="flex items-center gap-1">
               {[
-                { id: 'all', label: 'All (150 Nodes)' },
-                { id: 'high_critical', label: 'High & Critical Only' },
-                { id: 'critical', label: 'Critical Only' },
+                { id: 'all', label: `${t('filter_all', 'All')} (150)` },
+                { id: 'high_critical', label: `${t('filter_high', 'High')} & ${t('filter_critical', 'Critical')}` },
+                { id: 'critical', label: t('filter_critical', 'Critical Only') },
               ].map((rf) => (
                 <button
                   key={rf.id}

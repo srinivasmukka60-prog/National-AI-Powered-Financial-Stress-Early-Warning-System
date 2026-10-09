@@ -16,6 +16,7 @@ import {
   Flame,
   ShieldCheck,
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CrisisSimulatorViewProps {
   darkMode: boolean;
@@ -40,6 +41,7 @@ export const CrisisSimulatorView: React.FC<CrisisSimulatorViewProps> = ({
   initialPresetId,
   presetTimestamp,
 }) => {
+  const { t } = useLanguage();
   const [params, setParams] = useState<CrisisScenarioParams>(DEFAULT_PARAMS);
   const [activePresetId, setActivePresetId] = useState<string | null>(initialPresetId || null);
 
@@ -87,13 +89,13 @@ export const CrisisSimulatorView: React.FC<CrisisSimulatorViewProps> = ({
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-amber-500 uppercase tracking-wider mb-1">
               <Zap className="w-3.5 h-3.5" />
-              <span>Stress Testing & Macro Shock Transmission</span>
+              <span>{t('macro_simulator', 'Stress Testing & Macro Shock Transmission')}</span>
             </div>
             <h2 className={`text-xl md:text-2xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-              Crisis & National Economic Shock Simulator
+              {t('crisis_sim_title', 'Crisis & National Economic Shock Simulator')}
             </h2>
             <p className="text-xs md:text-sm text-slate-400 mt-1">
-              Simulate interest rate spikes, input inflation, payment delays, and export contractions to predict cross-sector and cross-regional financial contagion.
+              {t('crisis_sim_subtitle', 'Simulate interest rate spikes, input inflation, payment delays, and export contractions to predict cross-sector and cross-regional financial contagion.')}
             </p>
           </div>
 
@@ -104,7 +106,7 @@ export const CrisisSimulatorView: React.FC<CrisisSimulatorViewProps> = ({
             }`}
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset to Baseline</span>
+            <span>{t('reset_simulation', 'Reset to Baseline')}</span>
           </button>
         </div>
       </div>
@@ -113,7 +115,7 @@ export const CrisisSimulatorView: React.FC<CrisisSimulatorViewProps> = ({
       <div>
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
           <Flame className="w-3.5 h-3.5 text-amber-500" />
-          <span>One-Click National Economic Shock Scenarios:</span>
+          <span>{t('macro_stress_levers', 'One-Click National Economic Shock Scenarios:')}</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

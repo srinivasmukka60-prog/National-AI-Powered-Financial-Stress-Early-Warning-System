@@ -192,6 +192,22 @@ How can I assist you with corporate treasury, general financial questions, tax o
     scrollToBottom();
   }, [messages, loading]);
 
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].id === 'welcome_1') {
+        return [
+          {
+            id: 'welcome_1',
+            sender: 'cfo',
+            text: t('cfo_welcome_msg', `Hello, I am your AI Digital CFO powered by Gemini 2.5 Flash and calibrated financial models. I am actively monitoring ${PRESET_ENTITIES.surat_textiles.businessName}'s balance sheet and cash conversion metrics. \n\nHow can I assist you with corporate treasury, general financial questions, tax optimization, or day-to-day business operations today?`),
+            timestamp: 'Just now',
+          },
+        ];
+      }
+      return prev;
+    });
+  }, [t]);
+
   const handleSelectPreset = (key: string) => {
     setActivePresetKey(key);
     const chosen = PRESET_ENTITIES[key];
@@ -292,7 +308,7 @@ ${item.projectedMetricImpact.map((p) => `• ${p.metric}: ${p.before} -> ${p.aft
             <div>
               <div className="flex items-center gap-2">
                 <span className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                  AI Digital CFO · Virtual Treasury Copilot
+                  {t('cfo_copilot_badge', 'AI Digital CFO · Virtual Treasury Copilot')}
                 </span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border flex items-center gap-1 ${
                   darkMode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-indigo-50 text-indigo-700 border-indigo-200'
@@ -312,7 +328,7 @@ ${item.projectedMetricImpact.map((p) => `• ${p.metric}: ${p.before} -> ${p.aft
 
           {/* Preset Context Selector */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`text-xs font-semibold mr-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>Consulting Context:</span>
+            <span className={`text-xs font-semibold mr-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{t('consulting_context', 'Consulting Context:')}</span>
             {Object.entries(PRESET_ENTITIES).map(([key, item]) => (
               <button
                 key={key}

@@ -85,10 +85,10 @@ export const AgencyHeader: React.FC<AgencyHeaderProps> = ({
   }, []);
 
   const { profile } = useUserProfile();
-  const { language, setLanguage: ctxSetLanguage, t } = useLanguage();
+  const { language: ctxLanguage, setLanguage: ctxSetLanguage, t } = useLanguage();
 
-  // Allow override via props (backwards compat), but prefer context
-  const activeLang = language;
+  // Prefer context language, allow fallback to prop
+  const activeLang = ctxLanguage || language;
   const handleSetLanguage = (lang: SupportedLanguage) => {
     ctxSetLanguage(lang);
     if (setLanguage) setLanguage(lang);
